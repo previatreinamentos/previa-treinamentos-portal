@@ -1,547 +1,222 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Autoescola Digital - Login</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel do Instrutor</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-    <!-- Preconexão para agilizar carregamento -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    body {
+      background-color: #0b2219;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #ffffff;
+    }
 
-    <!-- Configurações PWA Web App -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Autoescola">
+    .container {
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+      text-align: center;
+    }
 
-    <style>
-        /* Variáveis CSS Dinâmicas (Atualizadas via Google Sheets) */
-        :root {
-            --cor-fundo: #04201a;
-            --cor-card: #062d24;
-            --cor-botao: #f05a24;
-            --cor-texto-botao: #ffffff;
-            --cor-titulo-destaque: #f05a24;
-            --cor-input-bg: #e1eae7;
-            --cor-input-texto: #1a3831;
-            --cor-texto-padrao: #ffffff;
-            --cor-texto-secundario: #a3c2b8;
-            --raio-borda: 16px;
-        }
+    .icon-container {
+      width: 90px;
+      height: 90px;
+      background-color: #123d2f;
+      border-radius: 50%;
+      margin: 0 auto 20px auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+    .icon-container img {
+      width: 50px;
+      height: 50px;
+    }
 
-        body {
-            background-color: var(--cor-fundo);
-            color: var(--cor-texto-padrao);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            transition: background-color 0.4s ease;
-        }
+    .logo-title {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
 
-        .container {
-            width: 100%;
-            max-width: 420px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    .logo-title span {
+      color: #ff5722;
+    }
 
-        /* Card Central */
-        .card-login {
-            background-color: var(--cor-card);
-            width: 100%;
-            border-radius: var(--raio-borda);
-            padding: 36px 28px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            transition: background-color 0.4s ease;
-        }
+    .subtitle {
+      font-size: 0.95rem;
+      color: #a3c2b5;
+      margin-bottom: 25px;
+    }
 
-        /* Logotipo / Ícone */
-        .logo-container {
-            width: 84px;
-            height: 84px;
-            background: rgba(255, 255, 255, 0.06);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            overflow: hidden;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-        }
+    .badge-button {
+      background-color: #ff5722;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 15px rgba(255, 87, 34, 0.3);
+      cursor: pointer;
+      text-transform: uppercase;
+    }
 
-        .logo-img {
-            width: 60%;
-            height: 60%;
-            object-fit: contain;
-        }
+    .form-group {
+      text-align: left;
+      margin-bottom: 15px;
+    }
 
-        /* Títulos */
-        .titulo {
-            font-size: 26px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            margin-bottom: 6px;
-            text-align: center;
-        }
+    .form-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #a3c2b5;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
 
-        .titulo span {
-            color: var(--cor-titulo-destaque);
-            transition: color 0.4s ease;
-        }
+    .input-box {
+      background-color: #e1eae7;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+    }
 
-        .subtitulo {
-            font-size: 14px;
-            color: var(--cor-texto-secundario);
-            margin-bottom: 24px;
-            text-align: center;
-            font-weight: 500;
-            line-height: 1.4;
-        }
+    .input-box input {
+      border: none;
+      background: transparent;
+      outline: none;
+      width: 100%;
+      font-size: 0.95rem;
+      color: #1a3831;
+      font-weight: 600;
+    }
 
-        /* Badge Instrução */
-        .badge-instrucao {
-            background-color: var(--cor-botao);
-            color: var(--cor-texto-botao);
-            font-size: 13px;
-            font-weight: 700;
-            padding: 8px 20px;
-            border-radius: 50px;
-            margin-bottom: 24px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 12px rgba(240, 90, 36, 0.3);
-            transition: background-color 0.4s ease, color 0.4s ease;
-        }
+    .input-box input::placeholder {
+      color: #7a948c;
+    }
 
-        /* Formulário */
-        form {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
+    .btn-submit {
+      width: 100%;
+      background-color: #ff5722;
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-top: 15px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
 
-        .campo-grupo {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
+    .hint-text {
+      font-size: 0.8rem;
+      color: #a3c2b5;
+      margin-top: 25px;
+      line-height: 1.4;
+    }
 
-        .campo-grupo label {
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--cor-texto-secundario);
-        }
-
-        .input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .input-wrapper i {
-            position: absolute;
-            left: 16px;
-            color: #5a756e;
-            font-size: 16px;
-        }
-
-        .input-campo {
-            width: 100%;
-            background-color: var(--cor-input-bg);
-            color: var(--cor-input-texto);
-            border: 2px solid transparent;
-            border-radius: 12px;
-            padding: 14px 16px 14px 46px;
-            font-size: 15px;
-            font-weight: 600;
-            outline: none;
-            transition: all 0.2s ease;
-        }
-
-        .input-campo:focus {
-            border-color: var(--cor-botao);
-            box-shadow: 0 0 0 4px rgba(240, 90, 36, 0.15);
-        }
-
-        /* Botão Entrar */
-        .btn-entrar {
-            background-color: var(--cor-botao);
-            color: var(--cor-texto-botao);
-            border: none;
-            border-radius: 12px;
-            padding: 16px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-            transition: all 0.2s ease;
-        }
-
-        .btn-entrar:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.08);
-        }
-
-        .btn-entrar:active {
-            transform: translateY(0);
-        }
-
-        /* Dica e Mensagem de Erro */
-        .texto-dica {
-            font-size: 12px;
-            color: var(--cor-texto-secundario);
-            margin-top: 18px;
-            text-align: center;
-            line-height: 1.5;
-            opacity: 0.9;
-        }
-
-        .msg-status {
-            font-size: 13px;
-            text-align: center;
-            margin-top: 12px;
-            padding: 10px;
-            border-radius: 8px;
-            display: none;
-            font-weight: 600;
-        }
-
-        .msg-erro {
-            background-color: rgba(255, 77, 77, 0.15);
-            color: #ff6b6b;
-            border: 1px solid rgba(255, 77, 77, 0.3);
-            display: block;
-        }
-
-        .msg-sucesso {
-            background-color: rgba(46, 213, 115, 0.15);
-            color: #2ed573;
-            border: 1px solid rgba(46, 213, 115, 0.3);
-            display: block;
-        }
-
-        /* Rodapé */
-        .rodape {
-            margin-top: 24px;
-            font-size: 12px;
-            color: var(--cor-texto-secundario);
-            text-align: center;
-            opacity: 0.7;
-        }
-
-        /* Loader Overlay */
-        .loader-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(6, 45, 36, 0.85);
-            backdrop-filter: blur(4px);
-            border-radius: var(--raio-borda);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            z-index: 10;
-        }
-
-        .loader-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .spinner {
-            width: 38px;
-            height: 38px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top: 4px solid var(--cor-botao);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Banner PWA para Baixar App */
-        .pwa-banner {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: calc(100% - 40px);
-            max-width: 400px;
-            background: #ffffff;
-            color: #1a3831;
-            padding: 14px 18px;
-            border-radius: 14px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-            z-index: 100;
-        }
-
-        .pwa-banner-text {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .pwa-banner-text i {
-            font-size: 24px;
-            color: var(--cor-botao);
-        }
-
-        .pwa-btn {
-            background: var(--cor-botao);
-            color: #fff;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 13px;
-            cursor: pointer;
-        }
-    </style>
+    .footer-text {
+      font-size: 0.75rem;
+      color: #5d7e73;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="card-login">
-            
-            <!-- Overlay Carregamento -->
-            <div class="loader-overlay" id="loader">
-                <div class="spinner"></div>
-                <span style="font-size: 13px; font-weight: 600;">Conectando...</span>
-            </div>
-
-            <!-- Ícone/Logo -->
-            <div class="logo-container">
-                <img id="logoImg" class="logo-img" src="https://cdn-icons-png.flaticon.com/512/3202/3202015.png" alt="Logo Autoescola">
-            </div>
-
-            <!-- Título & Subtítulo -->
-            <h1 class="titulo" id="tituloApp">PREV <span>IA</span></h1>
-            <p class="subtitulo" id="subtituloApp">Bem Vindo a Autoescola Digital</p>
-
-            <!-- Badge Instrução -->
-            <div class="badge-instrucao" id="badgeInstrucao">Painel do Instrutor</div>
-
-            <!-- Formulário -->
-            <form id="formLogin" onsubmit="realizarLogin(event)">
-                <div class="campo-grupo">
-                    <label>CPF</label>
-                    <div class="input-wrapper">
-                        <i class="fa-solid fa-id-card"></i>
-                        <input type="text" id="inputCPF" class="input-campo" placeholder="000.000.000-00" maxlength="14" required oninput="mascaraCPF(this)">
-                    </div>
-                </div>
-
-                <div class="campo-grupo">
-                    <label>Senha</label>
-                    <div class="input-wrapper">
-                        <i class="fa-solid fa-lock"></i>
-                        <input type="password" id="inputSenha" class="input-campo" placeholder="••••••••" required>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-entrar">
-                    ENTRAR <i class="fa-solid fa-arrow-right"></i>
-                </button>
-            </form>
-
-            <!-- Feedback de Status -->
-            <div id="msgStatus" class="msg-status"></div>
-
-            <!-- Dica de Senha -->
-            <p class="texto-dica" id="textoDica">Dica: Por padrão, a sua senha são os 4 primeiros dígitos do seu CPF.</p>
-        </div>
-
-        <!-- Rodapé -->
-        <div class="rodape" id="textoRodape">© 2026 Autoescola Digital - Painel do Instrutor</div>
+  <div class="container">
+    <div class="icon-container">
+      <img id="APP_ICON" src="https://cdn-icons-png.flaticon.com/512/3652/3652191.png" alt="Ícone">
     </div>
 
-    <!-- Banner PWA / Baixar App -->
-    <div class="pwa-banner" id="pwaBanner">
-        <div class="pwa-banner-text">
-            <i class="fa-solid fa-mobile-screen-button"></i>
-            <div>
-                <strong style="font-size: 13px; display: block;">Baixar o Aplicativo</strong>
-                <span style="font-size: 11px; opacity: 0.8;">Instale na tela inicial</span>
-            </div>
+    <h1 class="logo-title">
+      <span id="TITULO_PARTE1">PREV</span><span id="TITULO_PARTE2">IA</span>
+    </h1>
+    <p class="subtitle" id="SUBTITULO">Bem Vindo a Autoescola Digital</p>
+
+    <button class="badge-button" id="INSTRUCAO_LOGIN">PAINEL DO INSTRUTOR</button>
+
+    <form onsubmit="return false;">
+      <div class="form-group">
+        <label>CPF</label>
+        <div class="input-box" id="BOX_CPF">
+          <input type="text" id="INPUT_CPF" placeholder="000.000.000-00">
         </div>
-        <button class="pwa-btn" onclick="instalarPWA()">Instalar</button>
-    </div>
+      </div>
 
-    <script>
-        // CONFIGURAÇÃO: Insira aqui a URL do seu Google Apps Script implantado
-        let URL_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbzuE7Qg21SQ1RK-UvsWixHlJSQ2hu7i0ySTTcpGwcx0VkNWc0nNSujl6DTkzThAmlqJMg/exec';
+      <div class="form-group">
+        <label>SENHA</label>
+        <div class="input-box" id="BOX_SENHA">
+          <input type="password" id="INPUT_SENHA" placeholder="••••••••">
+        </div>
+      </div>
 
-        // 1. Carregar Configurações Visuais da Planilha
-        async function carregarConfiguracoes() {
-            mostrarLoader(true);
-            try {
-                const response = await fetch(`${URL_APPS_SCRIPT}?action=getLayoutConfig`);
-                const json = await response.json();
+      <button type="submit" class="btn-submit">
+        ENTRAR <span>→</span>
+      </button>
+    </form>
 
-                if (json.status === 'success' && json.data) {
-                    aplicarConfiguracoes(json.data);
-                }
-            } catch (err) {
-                console.warn('Não foi possível carregar as configurações personalizadas da planilha. Usando padrão.', err);
-            } finally {
-                mostrarLoader(false);
-            }
+    <p class="hint-text" id="DICA_SENHA">Dica: Por padrão, a sua senha são os 4 primeiros dígitos do seu CPF.</p>
+    <p class="footer-text" id="RODAPE_TEXTO"></p>
+  </div>
+
+  <script>
+    // Cole o link do seu Web App gerado no Apps Script aqui embaixo:
+    const URL_WEBAPP = "SUA_URL_DO_APPS_SCRIPT_AQUI";
+
+    async function carregarDados() {
+      try {
+        const response = await fetch(URL_WEBAPP + '?nocache=' + new Date().getTime());
+        const data = await response.json();
+
+        // Atualização de Textos
+        if (data.TITULO_PARTE1) document.getElementById('TITULO_PARTE1').innerText = data.TITULO_PARTE1;
+        if (data.TITULO_PARTE2) document.getElementById('TITULO_PARTE2').innerText = data.TITULO_PARTE2;
+        if (data.SUBTITULO) document.getElementById('SUBTITULO').innerText = data.SUBTITULO;
+        if (data.INSTRUCAO_LOGIN) document.getElementById('INSTRUCAO_LOGIN').innerText = data.INSTRUCAO_LOGIN;
+        if (data.DICA_SENHA) document.getElementById('DICA_SENHA').innerText = data.DICA_SENHA;
+        if (data.RODAPE_TEXTO) document.getElementById('RODAPE_TEXTO').innerText = data.RODAPE_TEXTO;
+
+        // Atualização de Ícone
+        if (data.URL_ICONE_APP) document.getElementById('APP_ICON').src = data.URL_ICONE_APP;
+
+        // Atualização de Cores dos Inputs
+        if (data.COR_INPUT_BG) {
+          document.getElementById('BOX_CPF').style.backgroundColor = data.COR_INPUT_BG;
+          document.getElementById('BOX_SENHA').style.backgroundColor = data.COR_INPUT_BG;
+        }
+        if (data.COR_INPUT_TEXTO) {
+          document.getElementById('INPUT_CPF').style.color = data.COR_INPUT_TEXTO;
+          document.getElementById('INPUT_SENHA').style.color = data.COR_INPUT_TEXTO;
         }
 
-        // 2. Aplicar estilos e textos retornados do Google Sheets
-        function aplicarConfiguracoes(c) {
-            const root = document.documentElement;
+      } catch (error) {
+        console.error("Erro ao sincronizar com a planilha:", error);
+      }
+    }
 
-            // Cores
-            if (c.COR_FUNDO) root.style.setProperty('--cor-fundo', c.COR_FUNDO);
-            if (c.COR_CARD) root.style.setProperty('--cor-card', c.COR_CARD);
-            if (c.COR_BOTAO) root.style.setProperty('--cor-botao', c.COR_BOTAO);
-            if (c.COR_TEXTO_BOTAO) root.style.setProperty('--cor-texto-botao', c.COR_TEXTO_BOTAO);
-            if (c.COR_TITULO_DESTAQUE) root.style.setProperty('--cor-titulo-destaque', c.COR_TITULO_DESTAQUE);
-            if (c.COR_INPUT_BG) root.style.setProperty('--cor-input-bg', c.COR_INPUT_BG);
-            if (c.COR_INPUT_TEXTO) root.style.setProperty('--cor-input-texto', c.COR_INPUT_TEXTO);
-
-            // Textos
-            const p1 = c.TITULO_PARTE1 || 'PREV';
-            const p2 = c.TITULO_PARTE2 || 'IA';
-            document.getElementById('tituloApp').innerHTML = `${p1} <span>${p2}</span>`;
-
-            if (c.SUBTITULO) document.getElementById('subtituloApp').innerText = c.SUBTITULO;
-            if (c.INSTRUCAO_LOGIN) document.getElementById('badgeInstrucao').innerText = c.INSTRUCAO_LOGIN;
-            if (c.DICA_SENHA) document.getElementById('textoDica').innerText = c.DICA_SENHA;
-            if (c.RODAPE_TEXTO) document.getElementById('textoRodape').innerText = c.RODAPE_TEXTO;
-
-            // Ícone
-            if (c.URL_ICONE_APP) {
-                document.getElementById('logoImg').src = c.URL_ICONE_APP;
-            }
-
-            // Atualizar URL caso venha da planilha
-            if (c.URL_WEBAPP && c.URL_WEBAPP.startsWith('http')) {
-                URL_APPS_SCRIPT = c.URL_WEBAPP;
-            }
-        }
-
-        // 3. Máscara de CPF automática
-        function mascaraCPF(input) {
-            let v = input.value.replace(/\D/g, "");
-            if (v.length > 11) v = v.substring(0, 11);
-            v = v.replace(/(\d{3})(\d)/, "$1.$2");
-            v = v.replace(/(\d{3})(\d)/, "$1.$2");
-            v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-            input.value = v;
-        }
-
-        // 4. Executar o Login
-        async function realizarLogin(e) {
-            e.preventDefault();
-            ocultarStatus();
-
-            const cpf = document.getElementById('inputCPF').value;
-            const senha = document.getElementById('inputSenha').value;
-
-            if (!cpf || !senha) {
-                exibirStatus('Preencha o CPF e a senha.', 'erro');
-                return;
-            }
-
-            mostrarLoader(true);
-
-            try {
-                const url = `${URL_APPS_SCRIPT}?action=loginInstrutor&cpf=${encodeURIComponent(cpf)}&senha=${encodeURIComponent(senha)}`;
-                const response = await fetch(url);
-                const res = await response.json();
-
-                if (res.success) {
-                    exibirStatus(res.message || 'Login realizado com sucesso!', 'sucesso');
-                    localStorage.setItem('usuarioInstrutor', JSON.stringify(res.usuario));
-                } else {
-                    exibirStatus(res.message || 'CPF ou senha inválidos.', 'erro');
-                }
-            } catch (err) {
-                exibirStatus('Erro de conexão com o servidor. Tente novamente.', 'erro');
-                console.error(err);
-            } finally {
-                mostrarLoader(false);
-            }
-        }
-
-        // Funções utilitárias de UI
-        function mostrarLoader(visivel) {
-            const loader = document.getElementById('loader');
-            if (visivel) loader.classList.add('active');
-            else loader.classList.remove('active');
-        }
-
-        function exibirStatus(msg, tipo) {
-            const el = document.getElementById('msgStatus');
-            el.innerText = msg;
-            el.className = 'msg-status ' + (tipo === 'sucesso' ? 'msg-sucesso' : 'msg-erro');
-        }
-
-        function ocultarStatus() {
-            const el = document.getElementById('msgStatus');
-            el.className = 'msg-status';
-            el.style.display = 'none';
-        }
-
-        // Suporte PWA (Instalação no Celular)
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('pwaBanner').style.display = 'flex';
-        });
-
-        function instalarPWA() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(() => {
-                    document.getElementById('pwaBanner').style.display = 'none';
-                    deferredPrompt = null;
-                });
-            }
-        }
-
-        // Iniciar ao carregar a página
-        window.addEventListener('DOMContentLoaded', carregarConfiguracoes);
-    </script>
+    window.onload = carregarDados;
+  </script>
 </body>
 </html>
