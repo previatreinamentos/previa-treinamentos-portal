@@ -1,69 +1,421 @@
-/**
- * AUTOESCOLA DIGITAL - BACKEND API (INSTRUTOR)
- * Conexão com GitHub Pages via GET / JSON
- */
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Autoescola Digital - Instrutor</title>
+  
+  <!-- Suporte a PWA & WebApp Mobile -->
+  <meta name="theme-color" content="#04201a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Instrutor App">
+  <link id="app-icon-apple" rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3202/3202015.png">
+  <link id="app-favicon" rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3202/3202015.png">
 
-function doGet(e) {
-  const action = e ? e.parameter.action : '';
-  let responseData = {};
+  <!-- Fonte -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  if (action === 'getLayoutConfig') {
-    responseData = getLayoutConfig();
-  } else if (action === 'loginInstrutor') {
-    const cpf = e.parameter.cpf || '';
-    const senha = e.parameter.senha || '';
-    responseData = processarLoginInstrutor(cpf, senha);
-  } else {
-    // Caso a URL seja acessada diretamente no navegador sem parâmetros
-    responseData = { 
-      status: 'online', 
-      message: 'API da Autoescola Digital funcionando com sucesso!' 
-    };
-  }
-
-  // Retorna os dados em formato JSON para o GitHub Pages
-  const output = ContentService.createTextOutput(JSON.stringify(responseData));
-  output.setMimeType(ContentService.MimeType.JSON);
-  return output;
-}
-
-// Busca as configurações salvas na planilha
-function getLayoutConfig() {
-  try {
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('CONFIG_LOGIN');
-    if (!sheet) {
-      return { status: 'error', message: 'Aba CONFIG_LOGIN não encontrada na Planilha!' };
+  <style>
+    /* Variáveis Globais de Cores (Atualizadas dinamicamente via Planilha) */
+    :root {
+      --bg-color: #04201a;
+      --card-bg: #062d24;
+      --primary-color: #f05a24;
+      --btn-text-color: #ffffff;
+      --highlight-color: #f05a24;
+      --input-bg: #e1eae7;
+      --input-text: #1a3831;
+      --text-white: #ffffff;
+      --text-sub: #8ea8a1;
     }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      transition: background-color 0.3s ease;
+    }
+
+    /* Container Card Principal */
+    .login-card {
+      background-color: var(--card-bg);
+      width: 100%;
+      max-width: 440px;
+      border-radius: 20px;
+      padding: 36px 28px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    /* Cabeçalho / Logo */
+    .logo-container {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--text-white);
+      margin-bottom: 6px;
+    }
+
+    .logo-highlight {
+      color: var(--highlight-color);
+    }
+
+    .sub-title {
+      color: var(--text-white);
+      font-size: 15px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    /* Badge fixo do perfil do Instrutor */
+    .profile-badge {
+      width: 100%;
+      background-color: var(--primary-color);
+      color: var(--btn-text-color);
+      text-align: center;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: 12px;
+      margin-top: 14px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(240, 90, 36, 0.3);
+    }
+
+    /* Formulário */
+    .form-group {
+      width: 100%;
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      color: var(--text-white);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      background-color: var(--input-bg);
+      color: var(--input-text);
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      outline: none;
+      transition: box-shadow 0.2s ease;
+    }
+
+    .form-input:focus {
+      box-shadow: 0 0 0 3px rgba(240, 90, 36, 0.4);
+    }
+
+    .form-input::placeholder {
+      color: #8fa39e;
+    }
+
+    /* Dica de Senha */
+    .hint-text {
+      color: var(--text-sub);
+      font-size: 11px;
+      font-style: italic;
+      text-align: center;
+      margin-top: 4px;
+      margin-bottom: 24px;
+      line-height: 1.4;
+    }
+
+    /* Botão Principal */
+    .btn-submit {
+      width: 100%;
+      padding: 15px;
+      background-color: var(--primary-color);
+      color: var(--btn-text-color);
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s ease, filter 0.2s ease;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+
+    .btn-submit:active {
+      transform: scale(0.98);
+    }
+
+    .footer-text {
+      margin-top: 24px;
+      color: var(--text-sub);
+      font-size: 11px;
+      text-align: center;
+      opacity: 0.7;
+    }
+
+    /* Banner Notificação PWA (Instalar App no Celular) */
+    .pwa-install-banner {
+      position: fixed;
+      bottom: 16px;
+      left: 16px;
+      right: 16px;
+      max-width: 440px;
+      margin: 0 auto;
+      background: #062d24;
+      border: 2px solid var(--primary-color);
+      border-radius: 16px;
+      padding: 16px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+      z-index: 9999;
+      animation: slideUp 0.4s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .pwa-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .pwa-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+
+    .pwa-text h4 {
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .pwa-text p {
+      color: var(--text-sub);
+      font-size: 11px;
+    }
+
+    .pwa-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-install {
+      background: var(--primary-color);
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-close-pwa {
+      background: transparent;
+      color: var(--text-sub);
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- CARD PRINCIPAL DO INSTRUTOR -->
+  <div class="login-card">
+    <div class="logo-container">
+      <span id="txt-logo1">PREV</span><span class="logo-highlight" id="txt-logo2">IA</span>
+    </div>
     
-    const data = sheet.getDataRange().getValues();
-    const config = {};
-    
-    for (let i = 0; i < data.length; i++) {
-      const chave = data[i][0];
-      const valor = data[i][1];
-      if (chave) {
-        config[chave.toString().trim()] = valor;
+    <div class="sub-title" id="txt-subtitulo">Bem Vindo a Autoescola Digital PREVIA.</div>
+
+    <!-- Badge Fixo do Perfil -->
+    <div class="profile-badge" id="txt-badge-instrutor">
+      Instrutor
+    </div>
+
+    <!-- FORMULÁRIO DE LOGIN -->
+    <form style="width: 100%;" onsubmit="executarLoginInstrutor(event)">
+      <div class="form-group">
+        <label class="form-label">CPF DO USUÁRIO</label>
+        <input type="tel" id="input-cpf" class="form-input" placeholder="000.000.000-00" maxlength="14" required oninput="mascaraCPF(this)">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">SENHA DE ACESSO</label>
+        <input type="password" id="input-senha" class="form-input" placeholder="Digite sua senha" required>
+      </div>
+
+      <div class="hint-text" id="txt-dica">
+        Dica: Por padrão, a sua senha são os 4 primeiros dígitos do seu CPF.
+      </div>
+
+      <button type="submit" class="btn-submit" id="btn-acessar">Acessar o Painel</button>
+    </form>
+
+    <div class="footer-text" id="txt-rodape">© Autoescola Digital - Instrutor</div>
+  </div>
+
+  <!-- BANNER PWA (DICA PARA BAIXAR/INSTALAR O APP) -->
+  <div class="pwa-install-banner" id="pwa-banner">
+    <div class="pwa-info">
+      <img src="" id="pwa-img-icon" class="pwa-icon" alt="App Icon">
+      <div class="pwa-text">
+        <h4>Instalar o App Instrutor</h4>
+        <p>Baixe para acessar direto da tela inicial</p>
+      </div>
+    </div>
+    <div class="pwa-actions">
+      <button class="btn-install" id="btn-pwa-install">Baixar</button>
+      <button class="btn-close-pwa" onclick="fecharBannerPWA()">✕</button>
+    </div>
+  </div>
+
+  <script>
+    // URL DO SEU GOOGLE APPS SCRIPT EMBUTIDA NO HTML
+    const URL_WEBAPP = "https://script.google.com/macros/s/AKfycbzuE7Qg21SQ1RK-UvsWixHlJSQ2hu7i0ySTTcpGwcx0VkNWc0nNSujl6DTkzThAmlqJMg/exec";
+
+    let deferredPrompt = null;
+
+    // Inicialização ao carregar a página no GitHub Pages
+    window.addEventListener('DOMContentLoaded', () => {
+      carregarConfiguracoesPlanilha();
+      configurarPWA();
+    });
+
+    // 1. CONEXÃO COM A PLANILHA DO GOOGLE VIA WEB APP URL
+    function carregarConfiguracoesPlanilha() {
+      fetch(`${URL_WEBAPP}?action=getLayoutConfig`)
+        .then(response => response.json())
+        .then(res => {
+          if (res.status === 'success') {
+            aplicarLayout(res.data);
+          }
+        })
+        .catch(err => console.error("Erro ao conectar com Google Sheets:", err));
+    }
+
+    function aplicarLayout(cfg) {
+      if (!cfg) return;
+
+      const root = document.documentElement;
+      if (cfg.COR_FUNDO) root.style.setProperty('--bg-color', cfg.COR_FUNDO);
+      if (cfg.COR_CARD) root.style.setProperty('--card-bg', cfg.COR_CARD);
+      if (cfg.COR_BOTAO) root.style.setProperty('--primary-color', cfg.COR_BOTAO);
+      if (cfg.COR_TEXTO_BOTAO) root.style.setProperty('--btn-text-color', cfg.COR_TEXTO_BOTAO);
+      if (cfg.COR_TITULO_DESTAQUE) root.style.setProperty('--highlight-color', cfg.COR_TITULO_DESTAQUE);
+      if (cfg.COR_INPUT_BG) root.style.setProperty('--input-bg', cfg.COR_INPUT_BG);
+      if (cfg.COR_INPUT_TEXTO) root.style.setProperty('--input-text', cfg.COR_INPUT_TEXTO);
+
+      if (cfg.TITULO_PARTE1) document.getElementById('txt-logo1').innerText = cfg.TITULO_PARTE1;
+      if (cfg.TITULO_PARTE2) document.getElementById('txt-logo2').innerText = cfg.TITULO_PARTE2;
+      if (cfg.SUBTITULO) document.getElementById('txt-subtitulo').innerText = cfg.SUBTITULO;
+      if (cfg.INSTRUCAO_LOGIN) document.getElementById('txt-badge-instrutor').innerText = cfg.INSTRUCAO_LOGIN;
+      if (cfg.DICA_SENHA) document.getElementById('txt-dica').innerText = cfg.DICA_SENHA;
+      if (cfg.RODAPE_TEXTO) document.getElementById('txt-rodape').innerText = cfg.RODAPE_TEXTO;
+
+      if (cfg.URL_ICONE_APP) {
+        document.getElementById('pwa-img-icon').src = cfg.URL_ICONE_APP;
+        document.getElementById('app-favicon').href = cfg.URL_ICONE_APP;
+        document.getElementById('app-icon-apple').href = cfg.URL_ICONE_APP;
       }
     }
-    
-    return { status: 'success', data: config };
-  } catch (err) {
-    return { status: 'error', message: err.toString() };
-  }
-}
 
-// Processa o login do Instrutor
-function processarLoginInstrutor(cpf, senha) {
-  const cpfLimpo = cpf.replace(/\D/g, '');
-  
-  if (!cpfLimpo || !senha) {
-    return { success: false, message: 'Por favor, preencha todos os campos.' };
-  }
+    // 2. MÁSCARA AUTOMÁTICA DE CPF
+    function mascaraCPF(input) {
+      let v = input.value.replace(/\D/g, '');
+      if (v.length > 11) v = v.substring(0, 11);
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      input.value = v;
+    }
 
-  return { 
-    success: true, 
-    message: 'Login de Instrutor efetuado com sucesso!',
-    perfil: 'Instrutor',
-    usuario: { cpf: cpfLimpo }
-  };
-}
+    // 3. ENVIO DO FORMULÁRIO DE LOGIN DO INSTRUTOR
+    function executarLoginInstrutor(e) {
+      e.preventDefault();
+      const cpf = document.getElementById('input-cpf').value;
+      const senha = document.getElementById('input-senha').value;
+
+      const btn = document.getElementById('btn-acessar');
+      btn.innerText = "Verificando...";
+      btn.disabled = true;
+
+      fetch(`${URL_WEBAPP}?action=loginInstrutor&cpf=${encodeURIComponent(cpf)}&senha=${encodeURIComponent(senha)}`)
+        .then(response => response.json())
+        .then(res => {
+          btn.innerText = "Acessar o Painel";
+          btn.disabled = false;
+
+          if (res.success) {
+            alert(res.message);
+            // Próximo passo: redirecionar para o Painel Inicial do Instrutor
+          } else {
+            alert(res.message);
+          }
+        })
+        .catch(err => {
+          btn.innerText = "Acessar o Painel";
+          btn.disabled = false;
+          alert("Erro na verificação. Tente novamente.");
+          console.error(err);
+        });
+    }
+
+    // 4. SUPORTE A PWA (SOLICITAÇÃO DE INSTALAÇÃO NO CELULAR)
+    function configurarPWA() {
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('pwa-banner').style.display = 'flex';
+      });
+
+      document.getElementById('btn-pwa-install').addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          console.log(`Instalação PWA: ${outcome}`);
+          deferredPrompt = null;
+          fecharBannerPWA();
+        }
+      });
+    }
+
+    function fecharBannerPWA() {
+      document.getElementById('pwa-banner').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
