@@ -3,241 +3,370 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login</title>
+  <title>PREVIA - Portal de Acesso</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <style>
+    :root {
+      --bg-page: #04201a;
+      --bg-card: #062d24;
+      --btn-color: #f05a24;
+      --btn-text: #ffffff;
+      --highlight-color: #f05a24;
+      --input-bg: #e1eae7;
+      --input-text: #1a3831;
+    }
+
     * {
-      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      box-sizing: border-box;
+      font-family: 'Plus Jakarta Sans', sans-serif;
     }
 
     body {
-      background-color: #07211a;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       min-height: 100vh;
-      padding: 16px;
+      background-color: var(--bg-page);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 16px;
     }
 
     .card {
-      background-color: #082b22;
-      border-radius: 20px;
-      padding: 32px 24px;
+      background-color: var(--bg-card);
       width: 100%;
-      max-width: 380px;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    }
-
-    .icon-wrapper {
-      width: 90px;
-      height: 90px;
-      background-color: rgba(255, 255, 255, 0.06);
-      border-radius: 50%;
-      margin: 0 auto 20px auto;
+      max-width: 440px;
+      border-radius: 36px;
+      padding: 44px 32px 32px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
+      transition: all 0.3s ease;
     }
 
-    .icon-wrapper img {
-      width: 48px;
-      height: 48px;
+    .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 22px;
     }
 
-    .logo {
-      font-size: 1.8rem;
-      font-weight: 900;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
+    .logo-text {
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: 4px;
+      text-transform: uppercase;
       color: #ffffff;
+      line-height: 1;
     }
 
     .logo-highlight {
-      color: #f25429;
+      color: var(--highlight-color);
     }
 
     .subtitle {
-      font-size: 0.9rem;
-      color: #86aba0;
-      margin-bottom: 24px;
+      color: #e2e8f0;
+      text-align: center;
+      font-size: 14.5px;
+      font-weight: 500;
+      line-height: 1.45;
+      margin-bottom: 28px;
+      max-width: 320px;
     }
 
-    .badge-btn {
-      background-color: #f25429;
-      color: #ffffff;
-      border: none;
-      padding: 10px 24px;
-      border-radius: 25px;
-      font-weight: 800;
-      font-size: 0.75rem;
-      letter-spacing: 0.8px;
+    .toggle-container {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.28);
+      border-radius: 20px;
+      padding: 5px;
+      display: flex;
       margin-bottom: 28px;
-      box-shadow: 0 4px 15px rgba(242, 84, 41, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .toggle-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 12px 14px;
+      border-radius: 16px;
+      font-weight: 700;
+      font-size: 13.5px;
       cursor: pointer;
+      color: #38bdf8;
+      transition: all 0.25s ease;
+      text-align: center;
+    }
+
+    .toggle-btn.active {
+      background-color: var(--btn-color);
+      color: var(--btn-text);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
     .form-group {
-      text-align: left;
-      margin-bottom: 16px;
+      width: 100%;
+      margin-bottom: 18px;
     }
 
-    .form-group label {
+    .form-label {
       display: block;
-      font-size: 0.7rem;
-      font-weight: 800;
-      color: #86aba0;
+      color: #f8fafc;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
       margin-bottom: 8px;
-      letter-spacing: 0.5px;
     }
 
-    .input-box {
-      background-color: #dce6e1;
-      border-radius: 14px;
+    .input-wrapper {
+      position: relative;
+      width: 100%;
       display: flex;
       align-items: center;
-      padding: 14px 16px;
-      gap: 12px;
     }
 
-    .input-box svg {
-      width: 18px;
-      height: 18px;
-      fill: #2f4842;
-      opacity: 0.7;
+    .input-wrapper svg {
+      position: absolute;
+      left: 16px;
+      width: 20px;
+      height: 20px;
+      stroke: #64748b;
+      pointer-events: none;
     }
 
-    .input-box input {
-      border: none;
-      background: transparent;
-      outline: none;
+    .input-field {
       width: 100%;
-      font-size: 0.95rem;
-      color: #2f4842;
+      height: 52px;
+      background-color: var(--input-bg);
+      color: var(--input-text);
+      border: 2px solid transparent;
+      border-radius: 16px;
+      padding: 0 16px 0 48px;
+      font-size: 14.5px;
       font-weight: 600;
+      outline: none;
+      transition: all 0.2s ease;
     }
 
-    .btn-submit {
+    .input-field:focus {
+      border-color: var(--btn-color);
+      background-color: #ffffff;
+      box-shadow: 0 0 0 3px rgba(240, 90, 36, 0.2);
+    }
+
+    .hint-text {
       width: 100%;
-      background-color: #f25429;
-      color: #ffffff;
+      color: #94a3b8;
+      font-size: 11.5px;
+      line-height: 1.4;
+      margin-top: -6px;
+      margin-bottom: 22px;
+      font-weight: 500;
+    }
+
+    .submit-btn {
+      width: 100%;
+      height: 54px;
+      background-color: var(--btn-color);
+      color: var(--btn-text);
       border: none;
-      padding: 16px;
-      border-radius: 14px;
-      font-size: 1rem;
-      font-weight: 800;
-      margin-top: 24px;
+      border-radius: 16px;
+      font-size: 15.5px;
+      font-weight: 700;
       cursor: pointer;
       display: flex;
-      justify-content: center;
       align-items: center;
-      gap: 8px;
-      letter-spacing: 0.5px;
+      justify-content: center;
+      gap: 12px;
+      transition: all 0.2s;
     }
 
-    .hint {
-      font-size: 0.75rem;
-      color: #86aba0;
-      margin-top: 24px;
-      line-height: 1.4;
+    .submit-btn:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    .submit-btn:active {
+      transform: scale(0.99);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .submit-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+    }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background-color: rgba(255, 255, 255, 0.08);
+      margin: 30px 0 20px;
+    }
+
+    .footer-text {
+      color: #64748b;
+      font-size: 12px;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 34px 20px 24px;
+        border-radius: 28px;
+      }
+      .logo-text { font-size: 28px; }
+      .subtitle { font-size: 13.5px; }
+      .input-field { height: 48px; font-size: 14px; }
+      .submit-btn { height: 50px; font-size: 14.5px; }
     }
   </style>
 </head>
 <body>
 
-  <div class="card" id="CARD_CONTAINER">
-    <div class="icon-wrapper">
-      <img id="APP_ICON" src="https://cdn-icons-png.flaticon.com/512/3652/3652191.png" alt="Ícone">
+  <div class="card">
+    <div class="logo-container">
+      <div class="logo-text">PREV<span class="logo-highlight">IA</span></div>
     </div>
 
-    <h1 class="logo">
-      <span id="TITULO_PARTE1">PREV</span><span class="logo-highlight" id="TITULO_PARTE2">IA</span>
-    </h1>
-    <p class="subtitle" id="SUBTITULO">Bem Vindo a Autoescola Digital</p>
+    <p class="subtitle" id="labelBoasVindas">Bem Vindo a Autoescola Digital PREVIA.<br>Selecione seu perfil abaixo para acessar o sistema</p>
 
-    <button class="badge-btn" id="INSTRUCAO_LOGIN">PAINEL DO INSTRUTOR</button>
+    <div class="toggle-container">
+      <button type="button" class="toggle-btn active" id="btnAluno" onclick="mudarPerfil('aluno')">Sou Aluno</button>
+      <button type="button" class="toggle-btn" id="btnInstrutor" onclick="mudarPerfil('instrutor')">Sou Instrutor</button>
+    </div>
 
-    <form onsubmit="return false;">
+    <form id="formLogin" onsubmit="realizarLogin(event)" style="width: 100%;">
       <div class="form-group">
-        <label id="LABEL_CPF">CPF</label>
-        <div class="input-box" id="BOX_CPF">
-          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 4h16V6H4v2zm0 4h7v-2H4v2zm0 4h4v-2H4v2z"/></svg>
-          <input type="text" id="INPUT_CPF" placeholder="000.000.000-00">
+        <label class="form-label" id="labelTelefone">Telefone do Aluno</label>
+        <div class="input-wrapper">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+          </svg>
+          <input type="text" id="campoTelefone" class="input-field" placeholder="(11) 97638-7110" required oninput="aplicarMascaraTelefone(this)">
         </div>
       </div>
 
       <div class="form-group">
-        <label id="LABEL_SENHA">SENHA</label>
-        <div class="input-box" id="BOX_SENHA">
-          <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-          <input type="password" id="INPUT_SENHA" placeholder="••••••••">
+        <label class="form-label">Senha de Acesso</label>
+        <div class="input-wrapper">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+          </svg>
+          <input type="password" id="campoSenha" class="input-field" placeholder="Digite sua senha" required>
         </div>
       </div>
 
-      <button type="submit" class="btn-submit" id="BTN_ENTRAR">
-        ENTRAR <span>→</span>
+      <div class="hint-text" id="labelDicaSenha">Dica: Por padrão, a sua senha são os 4 primeiros dígitos do celular (sem DDD).</div>
+
+      <button type="submit" id="btnSubmit" class="submit-btn">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+        </svg>
+        <span id="btnSubmitTexto">Acessar o Painel</span>
       </button>
     </form>
 
-    <p class="hint" id="DICA_SENHA">Dica: Por padrão, a sua senha são os 4 primeiros dígitos do seu CPF.</p>
+    <div class="divider"></div>
+    <div class="footer-text">© 2026 Previa Treinamentos</div>
   </div>
 
   <script>
-    // COLE ABAIXO A SUA URL DO GOOGLE APPS SCRIPT
-    const URL_WEBAPP = "https://script.google.com/macros/s/AKfycbzuE7Qg21SQ1RK-UvsWixHlJSQ2hu7i0ySTTcpGwcx0VkNWc0nNSujl6DTkzThAmlqJMg/exec";
+    // URL da API do Google Apps Script
+    // Cole aqui a URL gerada na implantação ou configure direto na planilha
+    const WEBAPP_URL = "https://script.google.com/macros/s/SEU_DEPLOY_ID/exec";
 
-    async function aplicarPersonalizacoes() {
-      if (!URL_WEBAPP || URL_WEBAPP.includes("SUA_URL")) return;
+    let perfilAtual = 'aluno';
 
-      try {
-        const response = await fetch(URL_WEBAPP + '?v=' + new Date().getTime());
-        const data = await response.json();
+    function mudarPerfil(perfil) {
+      perfilAtual = perfil;
+      const isAluno = perfil === 'aluno';
 
-        // 1. TEXTOS
-        if (data.TITULO_PARTE1) document.getElementById('TITULO_PARTE1').innerText = data.TITULO_PARTE1;
-        if (data.TITULO_PARTE2) document.getElementById('TITULO_PARTE2').innerText = data.TITULO_PARTE2;
-        if (data.SUBTITULO) document.getElementById('SUBTITULO').innerText = data.SUBTITULO;
-        if (data.INSTRUCAO_LOGIN) document.getElementById('INSTRUCAO_LOGIN').innerText = data.INSTRUCAO_LOGIN;
-        if (data.DICA_SENHA) document.getElementById('DICA_SENHA').innerText = data.DICA_SENHA;
+      document.getElementById('btnAluno').classList.toggle('active', isAluno);
+      document.getElementById('btnInstrutor').classList.toggle('active', !isAluno);
 
-        // 2. IMAGEM DO ÍCONE
-        if (data.URL_ICONE_APP) document.getElementById('APP_ICON').src = data.URL_ICONE_APP;
-
-        // 3. CORES
-        if (data.COR_FUNDO) document.body.style.backgroundColor = data.COR_FUNDO;
-        if (data.COR_CARD_BG) document.getElementById('CARD_CONTAINER').style.backgroundColor = data.COR_CARD_BG;
-        
-        if (data.COR_DESTAQUE) {
-          document.getElementById('TITULO_PARTE2').style.color = data.COR_DESTAQUE;
-          document.getElementById('INSTRUCAO_LOGIN').style.backgroundColor = data.COR_DESTAQUE;
-          document.getElementById('BTN_ENTRAR').style.backgroundColor = data.COR_DESTAQUE;
-        }
-
-        if (data.COR_INPUT_BG) {
-          document.getElementById('BOX_CPF').style.backgroundColor = data.COR_INPUT_BG;
-          document.getElementById('BOX_SENHA').style.backgroundColor = data.COR_INPUT_BG;
-        }
-
-        if (data.COR_INPUT_TEXTO) {
-          document.getElementById('INPUT_CPF').style.color = data.COR_INPUT_TEXTO;
-          document.getElementById('INPUT_SENHA').style.color = data.COR_INPUT_TEXTO;
-        }
-
-        if (data.COR_TEXTO_SUBTITULO) {
-          document.getElementById('SUBTITULO').style.color = data.COR_TEXTO_SUBTITULO;
-          document.getElementById('LABEL_CPF').style.color = data.COR_TEXTO_SUBTITULO;
-          document.getElementById('LABEL_SENHA').style.color = data.COR_TEXTO_SUBTITULO;
-          document.getElementById('DICA_SENHA').style.color = data.COR_TEXTO_SUBTITULO;
-        }
-
-      } catch (e) {
-        console.error("Erro ao carregar configurações da planilha:", e);
-      }
+      document.getElementById('labelTelefone').innerText = isAluno ? 'Telefone do Aluno' : 'Telefone do Instrutor';
+      document.getElementById('labelDicaSenha').innerText = isAluno 
+        ? 'Dica: Por padrão, a sua senha são os 4 primeiros dígitos do celular (sem DDD).' 
+        : 'Dica: Digite sua senha cadastrada de instrutor.';
     }
 
-    window.onload = aplicarPersonalizacoes;
+    function aplicarMascaraTelefone(el) {
+      let v = el.value.replace(/\D/g, '');
+      if (v.length > 11) v = v.substring(0, 11);
+      if (v.length > 10) {
+        v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+      } else if (v.length > 5) {
+        v = v.replace(/^(\d{2})(\d{4})(\d{0,4})$/, '($1) $2-$3');
+      } else if (v.length > 2) {
+        v = v.replace(/^(\d{2})(\d{0,5})$/, '($1) $2');
+      }
+      el.value = v;
+    }
+
+    async function realizarLogin(e) {
+      e.preventDefault();
+      const telefone = document.getElementById('campoTelefone').value;
+      const senha = document.getElementById('campoSenha').value;
+      const btn = document.getElementById('btnSubmit');
+      const btnTexto = document.getElementById('btnSubmitTexto');
+
+      if (!WEBAPP_URL || WEBAPP_URL.includes("SEU_DEPLOY_ID")) {
+        alert("Por favor, configure a URL_WEBAPP do Apps Script na constante WEBAPP_URL.");
+        return;
+      }
+
+      btnTexto.innerText = "Verificando...";
+      btn.disabled = true;
+
+      const acao = perfilAtual === 'aluno' ? 'loginAluno' : 'loginInstrutor';
+
+      try {
+        const response = await fetch(WEBAPP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: acao, telefone, senha })
+        });
+
+        const res = await response.json();
+
+        if (res.sucesso) {
+          // Armazena a sessão e dados no localStorage
+          localStorage.setItem('previa_perfil', perfilAtual);
+          localStorage.setItem('previa_usuario', JSON.stringify(res.dados));
+          localStorage.setItem('previa_webapp_url', WEBAPP_URL);
+
+          // Redireciona para o painel correspondente no GitHub
+          if (perfilAtual === 'instrutor') {
+            window.location.href = "instrutor.html";
+          } else {
+            // Se você tiver aluno.html ou quiser direcionar
+            window.location.href = "aluno.html";
+          }
+        } else {
+          alert(res.mensagem || "Dados inválidos!");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Falha na comunicação com a planilha. Verifique a URL do Apps Script.");
+      } finally {
+        btnTexto.innerText = "Acessar o Painel";
+        btn.disabled = false;
+      }
+    }
   </script>
 </body>
 </html>
