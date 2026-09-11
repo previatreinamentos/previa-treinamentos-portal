@@ -1,0 +1,69 @@
+/**
+ * AUTOESCOLA DIGITAL - BACKEND API (INSTRUTOR)
+ * Conexão com GitHub Pages via GET / JSON
+ */
+
+function doGet(e) {
+  const action = e ? e.parameter.action : '';
+  let responseData = {};
+
+  if (action === 'getLayoutConfig') {
+    responseData = getLayoutConfig();
+  } else if (action === 'loginInstrutor') {
+    const cpf = e.parameter.cpf || '';
+    const senha = e.parameter.senha || '';
+    responseData = processarLoginInstrutor(cpf, senha);
+  } else {
+    // Caso a URL seja acessada diretamente no navegador sem parâmetros
+    responseData = { 
+      status: 'online', 
+      message: 'API da Autoescola Digital funcionando com sucesso!' 
+    };
+  }
+
+  // Retorna os dados em formato JSON para o GitHub Pages
+  const output = ContentService.createTextOutput(JSON.stringify(responseData));
+  output.setMimeType(ContentService.MimeType.JSON);
+  return output;
+}
+
+// Busca as configurações salvas na planilha
+function getLayoutConfig() {
+  try {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('CONFIG_LOGIN');
+    if (!sheet) {
+      return { status: 'error', message: 'Aba CONFIG_LOGIN não encontrada na Planilha!' };
+    }
+    
+    const data = sheet.getDataRange().getValues();
+    const config = {};
+    
+    for (let i = 0; i < data.length; i++) {
+      const chave = data[i][0];
+      const valor = data[i][1];
+      if (chave) {
+        config[chave.toString().trim()] = valor;
+      }
+    }
+    
+    return { status: 'success', data: config };
+  } catch (err) {
+    return { status: 'error', message: err.toString() };
+  }
+}
+
+// Processa o login do Instrutor
+function processarLoginInstrutor(cpf, senha) {
+  const cpfLimpo = cpf.replace(/\D/g, '');
+  
+  if (!cpfLimpo || !senha) {
+    return { success: false, message: 'Por favor, preencha todos os campos.' };
+  }
+
+  return { 
+    success: true, 
+    message: 'Login de Instrutor efetuado com sucesso!',
+    perfil: 'Instrutor',
+    usuario: { cpf: cpfLimpo }
+  };
+}
