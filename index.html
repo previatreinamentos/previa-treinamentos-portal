@@ -3,35 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel do Instrutor</title>
+  <title>Login</title>
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     body {
-      background-color: #0b2219;
+      background-color: #07211a;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      color: #ffffff;
+      padding: 16px;
     }
 
-    .container {
+    .card {
+      background-color: #082b22;
+      border-radius: 20px;
+      padding: 32px 24px;
       width: 100%;
-      max-width: 400px;
-      padding: 20px;
+      max-width: 380px;
       text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
 
-    .icon-container {
+    .icon-wrapper {
       width: 90px;
       height: 90px;
-      background-color: #123d2f;
+      background-color: rgba(255, 255, 255, 0.06);
       border-radius: 50%;
       margin: 0 auto 20px auto;
       display: flex;
@@ -39,63 +42,71 @@
       align-items: center;
     }
 
-    .icon-container img {
-      width: 50px;
-      height: 50px;
+    .icon-wrapper img {
+      width: 48px;
+      height: 48px;
     }
 
-    .logo-title {
-      font-size: 2rem;
-      font-weight: 800;
-      letter-spacing: 1px;
-      margin-bottom: 5px;
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      color: #ffffff;
     }
 
-    .logo-title span {
-      color: #ff5722;
+    .logo-highlight {
+      color: #f25429;
     }
 
     .subtitle {
-      font-size: 0.95rem;
-      color: #a3c2b5;
-      margin-bottom: 25px;
+      font-size: 0.9rem;
+      color: #86aba0;
+      margin-bottom: 24px;
     }
 
-    .badge-button {
-      background-color: #ff5722;
-      color: white;
+    .badge-btn {
+      background-color: #f25429;
+      color: #ffffff;
       border: none;
-      padding: 12px 24px;
-      border-radius: 20px;
-      font-weight: 700;
-      font-size: 0.85rem;
-      letter-spacing: 0.5px;
-      margin-bottom: 30px;
-      box-shadow: 0 4px 15px rgba(255, 87, 34, 0.3);
+      padding: 10px 24px;
+      border-radius: 25px;
+      font-weight: 800;
+      font-size: 0.75rem;
+      letter-spacing: 0.8px;
+      margin-bottom: 28px;
+      box-shadow: 0 4px 15px rgba(242, 84, 41, 0.4);
       cursor: pointer;
-      text-transform: uppercase;
     }
 
     .form-group {
       text-align: left;
-      margin-bottom: 15px;
+      margin-bottom: 16px;
     }
 
     .form-group label {
       display: block;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #a3c2b5;
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: #86aba0;
       margin-bottom: 8px;
       letter-spacing: 0.5px;
     }
 
     .input-box {
-      background-color: #e1eae7;
-      border-radius: 12px;
+      background-color: #dce6e1;
+      border-radius: 14px;
       display: flex;
       align-items: center;
-      padding: 12px 16px;
+      padding: 14px 16px;
+      gap: 12px;
+    }
+
+    .input-box svg {
+      width: 18px;
+      height: 18px;
+      fill: #2f4842;
+      opacity: 0.7;
     }
 
     .input-box input {
@@ -104,119 +115,129 @@
       outline: none;
       width: 100%;
       font-size: 0.95rem;
-      color: #1a3831;
+      color: #2f4842;
       font-weight: 600;
-    }
-
-    .input-box input::placeholder {
-      color: #7a948c;
     }
 
     .btn-submit {
       width: 100%;
-      background-color: #ff5722;
-      color: white;
+      background-color: #f25429;
+      color: #ffffff;
       border: none;
-      padding: 14px;
-      border-radius: 12px;
+      padding: 16px;
+      border-radius: 14px;
       font-size: 1rem;
-      font-weight: 700;
-      margin-top: 15px;
+      font-weight: 800;
+      margin-top: 24px;
       cursor: pointer;
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 8px;
+      letter-spacing: 0.5px;
     }
 
-    .hint-text {
-      font-size: 0.8rem;
-      color: #a3c2b5;
-      margin-top: 25px;
-      line-height: 1.4;
-    }
-
-    .footer-text {
+    .hint {
       font-size: 0.75rem;
-      color: #5d7e73;
-      margin-top: 20px;
+      color: #86aba0;
+      margin-top: 24px;
+      line-height: 1.4;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <div class="icon-container">
+  <div class="card" id="CARD_CONTAINER">
+    <div class="icon-wrapper">
       <img id="APP_ICON" src="https://cdn-icons-png.flaticon.com/512/3652/3652191.png" alt="Ícone">
     </div>
 
-    <h1 class="logo-title">
-      <span id="TITULO_PARTE1">PREV</span><span id="TITULO_PARTE2">IA</span>
+    <h1 class="logo">
+      <span id="TITULO_PARTE1">PREV</span><span class="logo-highlight" id="TITULO_PARTE2">IA</span>
     </h1>
     <p class="subtitle" id="SUBTITULO">Bem Vindo a Autoescola Digital</p>
 
-    <button class="badge-button" id="INSTRUCAO_LOGIN">PAINEL DO INSTRUTOR</button>
+    <button class="badge-btn" id="INSTRUCAO_LOGIN">PAINEL DO INSTRUTOR</button>
 
     <form onsubmit="return false;">
       <div class="form-group">
-        <label>CPF</label>
+        <label id="LABEL_CPF">CPF</label>
         <div class="input-box" id="BOX_CPF">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 4h16V6H4v2zm0 4h7v-2H4v2zm0 4h4v-2H4v2z"/></svg>
           <input type="text" id="INPUT_CPF" placeholder="000.000.000-00">
         </div>
       </div>
 
       <div class="form-group">
-        <label>SENHA</label>
+        <label id="LABEL_SENHA">SENHA</label>
         <div class="input-box" id="BOX_SENHA">
+          <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
           <input type="password" id="INPUT_SENHA" placeholder="••••••••">
         </div>
       </div>
 
-      <button type="submit" class="btn-submit">
+      <button type="submit" class="btn-submit" id="BTN_ENTRAR">
         ENTRAR <span>→</span>
       </button>
     </form>
 
-    <p class="hint-text" id="DICA_SENHA">Dica: Por padrão, a sua senha são os 4 primeiros dígitos do seu CPF.</p>
-    <p class="footer-text" id="RODAPE_TEXTO"></p>
+    <p class="hint" id="DICA_SENHA">Dica: Por padrão, a sua senha são os 4 primeiros dígitos do seu CPF.</p>
   </div>
 
   <script>
-    // Cole o link do seu Web App gerado no Apps Script aqui embaixo:
-    const URL_WEBAPP = "SUA_URL_DO_APPS_SCRIPT_AQUI";
+    // COLE ABAIXO A SUA URL DO GOOGLE APPS SCRIPT
+    const URL_WEBAPP = "https://script.google.com/macros/s/AKfycbzuE7Qg21SQ1RK-UvsWixHlJSQ2hu7i0ySTTcpGwcx0VkNWc0nNSujl6DTkzThAmlqJMg/exec";
 
-    async function carregarDados() {
+    async function aplicarPersonalizacoes() {
+      if (!URL_WEBAPP || URL_WEBAPP.includes("SUA_URL")) return;
+
       try {
-        const response = await fetch(URL_WEBAPP + '?nocache=' + new Date().getTime());
+        const response = await fetch(URL_WEBAPP + '?v=' + new Date().getTime());
         const data = await response.json();
 
-        // Atualização de Textos
+        // 1. TEXTOS
         if (data.TITULO_PARTE1) document.getElementById('TITULO_PARTE1').innerText = data.TITULO_PARTE1;
         if (data.TITULO_PARTE2) document.getElementById('TITULO_PARTE2').innerText = data.TITULO_PARTE2;
         if (data.SUBTITULO) document.getElementById('SUBTITULO').innerText = data.SUBTITULO;
         if (data.INSTRUCAO_LOGIN) document.getElementById('INSTRUCAO_LOGIN').innerText = data.INSTRUCAO_LOGIN;
         if (data.DICA_SENHA) document.getElementById('DICA_SENHA').innerText = data.DICA_SENHA;
-        if (data.RODAPE_TEXTO) document.getElementById('RODAPE_TEXTO').innerText = data.RODAPE_TEXTO;
 
-        // Atualização de Ícone
+        // 2. IMAGEM DO ÍCONE
         if (data.URL_ICONE_APP) document.getElementById('APP_ICON').src = data.URL_ICONE_APP;
 
-        // Atualização de Cores dos Inputs
+        // 3. CORES
+        if (data.COR_FUNDO) document.body.style.backgroundColor = data.COR_FUNDO;
+        if (data.COR_CARD_BG) document.getElementById('CARD_CONTAINER').style.backgroundColor = data.COR_CARD_BG;
+        
+        if (data.COR_DESTAQUE) {
+          document.getElementById('TITULO_PARTE2').style.color = data.COR_DESTAQUE;
+          document.getElementById('INSTRUCAO_LOGIN').style.backgroundColor = data.COR_DESTAQUE;
+          document.getElementById('BTN_ENTRAR').style.backgroundColor = data.COR_DESTAQUE;
+        }
+
         if (data.COR_INPUT_BG) {
           document.getElementById('BOX_CPF').style.backgroundColor = data.COR_INPUT_BG;
           document.getElementById('BOX_SENHA').style.backgroundColor = data.COR_INPUT_BG;
         }
+
         if (data.COR_INPUT_TEXTO) {
           document.getElementById('INPUT_CPF').style.color = data.COR_INPUT_TEXTO;
           document.getElementById('INPUT_SENHA').style.color = data.COR_INPUT_TEXTO;
         }
 
-      } catch (error) {
-        console.error("Erro ao sincronizar com a planilha:", error);
+        if (data.COR_TEXTO_SUBTITULO) {
+          document.getElementById('SUBTITULO').style.color = data.COR_TEXTO_SUBTITULO;
+          document.getElementById('LABEL_CPF').style.color = data.COR_TEXTO_SUBTITULO;
+          document.getElementById('LABEL_SENHA').style.color = data.COR_TEXTO_SUBTITULO;
+          document.getElementById('DICA_SENHA').style.color = data.COR_TEXTO_SUBTITULO;
+        }
+
+      } catch (e) {
+        console.error("Erro ao carregar configurações da planilha:", e);
       }
     }
 
-    window.onload = carregarDados;
+    window.onload = aplicarPersonalizacoes;
   </script>
 </body>
 </html>
