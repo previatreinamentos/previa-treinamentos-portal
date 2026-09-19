@@ -3,370 +3,2412 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PREVIA - Portal de Acesso</title>
   
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- ========================================================================= -->
+  <!-- [PERSONALIZAÇÃO]: TÍTULO DA ABA DO NAVEGADOR E COR DA BARRA SUPERIOR      -->
+  <!-- ========================================================================= -->
+  <title>CFC da Lu - Portal de Ensino Prático</title>
+  <meta name="theme-color" content="#505058">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CFC da Lu">
+
+  <!-- ==================== [CONFIGURAÇÃO DO WEB APP / PWA: NOME E ÍCONE] ==================== -->
+  <script>
+    const PWA_APP_NAME = "CFC da Lu - Portal de Ensino Prático";
+    const PWA_APP_SHORT_NAME = "CFC da Lu";
+    const PWA_APP_ICON = "https://lh3.googleusercontent.com/pw/AP1GczMGI1FfuM2RGmmzf5N-ovsxPOn2tQaSUjNAoTVjEcZOiVh2uA8uadEo2RseN2GeguvlnHxR1wyCD7fDFwT5Kub_DFVpmdlugRZYH5g1mGOROWBaIGIT9sGaZxgNDEQBiMuhTvJxZmDH_bvplW9HO_b8=w875-h779-s-no-gm?authuser=0";
+
+    const manifestJson = {
+      name: PWA_APP_NAME,
+      short_name: PWA_APP_SHORT_NAME,
+      start_url: "./",
+      scope: "./",
+      display: "standalone",
+      background_color: "#505058",
+      theme_color: "#505058",
+      icons: [
+        { src: PWA_APP_ICON, sizes: "192x192", type: "image/png" },
+        { src: PWA_APP_ICON, sizes: "512x512", type: "image/png" }
+      ]
+    };
+    const blobManifest = new Blob([JSON.stringify(manifestJson)], { type: 'application/json' });
+    const linkManifest = document.createElement('link');
+    linkManifest.rel = 'manifest';
+    linkManifest.href = URL.createObjectURL(blobManifest);
+    document.head.appendChild(linkManifest);
+  </script>
+
+  <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/pw/AP1GczMGI1FfuM2RGmmzf5N-ovsxPOn2tQaSUjNAoTVjEcZOiVh2uA8uadEo2RseN2GeguvlnHxR1wyCD7fDFwT5Kub_DFVpmdlugRZYH5g1mGOROWBaIGIT9sGaZxgNDEQBiMuhTvJxZmDH_bvplW9HO_b8=w875-h779-s-no-gm?authuser=0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://lh3.googleusercontent.com/pw/AP1GczMGI1FfuM2RGmmzf5N-ovsxPOn2tQaSUjNAoTVjEcZOiVh2uA8uadEo2RseN2GeguvlnHxR1wyCD7fDFwT5Kub_DFVpmdlugRZYH5g1mGOROWBaIGIT9sGaZxgNDEQBiMuhTvJxZmDH_bvplW9HO_b8=w875-h779-s-no-gm?authuser=0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <!-- ==================== [FIREBASE: SDKs DO NAVEGADOR] ==================== -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
   <style>
-    :root {
-      --bg-page: #04201a;
-      --bg-card: #062d24;
-      --btn-color: #f05a24;
+    :root { 
+      --bg-page: #505058;
+      --bg-card: #212121;
+      --btn-color: #e42268;
       --btn-text: #ffffff;
-      --highlight-color: #f05a24;
-      --input-bg: #e1eae7;
-      --input-text: #1a3831;
+      --highlight: #e42268;
+      --input-bg: #e3ece9;
+      --input-text: #8fa29d;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Plus Jakarta Sans', sans-serif; }
+    body { min-height:100vh; background-color:var(--bg-page); color:#1e293b; }
+    .sidebar-transition { transition: width 0.3s ease, padding 0.3s ease; }
+    .sidebar.collapsed { width: 80px !important; padding: 24px 12px !important; }
+    .sidebar.collapsed .hide-collapsed { display: none !important; }
+    .sidebar.collapsed .avatar-circle { margin: 0 auto; }
+    .sidebar.collapsed .menu-btn { justify-content: center; padding: 12px 0; }
+    .cal-card { background: #fff; border-radius: 20px; padding: 20px; border: 1px solid #e2e8f0; }
+    .cal-grid-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 11px; font-weight: 800; color: #64748b; margin-bottom: 8px; text-transform: uppercase; }
+    .cal-grid-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+    .cal-day-cell { height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; border: 1.5px solid transparent; }
+    .cal-day-cell.vazio { cursor: default; background: transparent !important; border: none; }
+    
+    .cal-day-cell.livre { background: #ecfdf5; color: #059669; border-color: #a7f3d0; }
+    .cal-day-cell.ocupado { background: #ffedd5; color: #ea580c; border-color: #fed7aa; }
+    .cal-day-cell.minha-aula { background: #ffedd5; color: #ea580c; border: 2px solid #ea580c; font-weight: 800; }
+    .cal-day-cell.selecionado { outline: 2.5px solid var(--btn-color); font-weight: 800; transform: scale(1.04); }
 
-    body {
-      min-height: 100vh;
-      background-color: var(--bg-page);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px 16px;
-    }
-
-    .card {
-      background-color: var(--bg-card);
-      width: 100%;
-      max-width: 440px;
-      border-radius: 36px;
-      padding: 44px 32px 32px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      transition: all 0.3s ease;
-    }
-
-    .logo-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 22px;
-    }
-
-    .logo-text {
-      font-size: 34px;
-      font-weight: 800;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      color: #ffffff;
-      line-height: 1;
-    }
-
-    .logo-highlight {
-      color: var(--highlight-color);
-    }
-
-    .subtitle {
-      color: #e2e8f0;
-      text-align: center;
-      font-size: 14.5px;
-      font-weight: 500;
-      line-height: 1.45;
-      margin-bottom: 28px;
-      max-width: 320px;
-    }
-
-    .toggle-container {
-      width: 100%;
-      background: rgba(0, 0, 0, 0.28);
-      border-radius: 20px;
-      padding: 5px;
-      display: flex;
-      margin-bottom: 28px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .toggle-btn {
-      flex: 1;
-      border: none;
-      background: transparent;
-      padding: 12px 14px;
-      border-radius: 16px;
-      font-weight: 700;
-      font-size: 13.5px;
-      cursor: pointer;
-      color: #38bdf8;
-      transition: all 0.25s ease;
-      text-align: center;
-    }
-
-    .toggle-btn.active {
-      background-color: var(--btn-color);
-      color: var(--btn-text);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-
-    .form-group {
-      width: 100%;
-      margin-bottom: 18px;
-    }
-
-    .form-label {
-      display: block;
-      color: #f8fafc;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-
-    .input-wrapper {
-      position: relative;
-      width: 100%;
-      display: flex;
-      align-items: center;
-    }
-
-    .input-wrapper svg {
-      position: absolute;
-      left: 16px;
-      width: 20px;
-      height: 20px;
-      stroke: #64748b;
-      pointer-events: none;
-    }
-
-    .input-field {
-      width: 100%;
-      height: 52px;
-      background-color: var(--input-bg);
-      color: var(--input-text);
-      border: 2px solid transparent;
-      border-radius: 16px;
-      padding: 0 16px 0 48px;
-      font-size: 14.5px;
-      font-weight: 600;
-      outline: none;
-      transition: all 0.2s ease;
-    }
-
-    .input-field:focus {
-      border-color: var(--btn-color);
-      background-color: #ffffff;
-      box-shadow: 0 0 0 3px rgba(240, 90, 36, 0.2);
-    }
-
-    .hint-text {
-      width: 100%;
-      color: #94a3b8;
-      font-size: 11.5px;
-      line-height: 1.4;
-      margin-top: -6px;
-      margin-bottom: 22px;
-      font-weight: 500;
-    }
-
-    .submit-btn {
-      width: 100%;
-      height: 54px;
-      background-color: var(--btn-color);
-      color: var(--btn-text);
-      border: none;
-      border-radius: 16px;
-      font-size: 15.5px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      transition: all 0.2s;
-    }
-
-    .submit-btn:hover {
-      filter: brightness(1.08);
-      transform: translateY(-1px);
-    }
-
-    .submit-btn:active {
-      transform: scale(0.99);
-    }
-
-    .submit-btn:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .submit-btn svg {
-      width: 20px;
-      height: 20px;
-      stroke: currentColor;
-    }
-
-    .divider {
-      width: 100%;
-      height: 1px;
-      background-color: rgba(255, 255, 255, 0.08);
-      margin: 30px 0 20px;
-    }
-
-    .footer-text {
-      color: #64748b;
-      font-size: 12px;
-      font-weight: 500;
-      text-align: center;
-    }
-
-    @media (max-width: 480px) {
-      .card {
-        padding: 34px 20px 24px;
-        border-radius: 28px;
-      }
-      .logo-text { font-size: 28px; }
-      .subtitle { font-size: 13.5px; }
-      .input-field { height: 48px; font-size: 14px; }
-      .submit-btn { height: 50px; font-size: 14.5px; }
-    }
+    .tab-login-btn { cursor: pointer !important; z-index: 50 !important; position: relative !important; }
   </style>
 </head>
 <body>
 
-  <div class="card">
-    <div class="logo-container">
-      <div class="logo-text">PREV<span class="logo-highlight">IA</span></div>
-    </div>
+  <!-- ==================== [FIREBASE: CONFIGURAÇÃO DO PROJETO] ==================== -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCdhoInoyVQcbVwoZLNFVsGB6EMEb-krIw",
+      authDomain: "base-de-dados-1f1ae.firebaseapp.com",
+      projectId: "base-de-dados-1f1ae",
+      storageBucket: "base-de-dados-1f1ae.firebasestorage.app",
+      messagingSenderId: "188045159180",
+      appId: "1:188045159180:web:1e02c2e2b3372b22a27729",
+      measurementId: "G-WZKEQYNMH3"
+    };
 
-    <p class="subtitle" id="labelBoasVindas">Bem Vindo a Autoescola Digital PREVIA.<br>Selecione seu perfil abaixo para acessar o sistema</p>
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
 
-    <div class="toggle-container">
-      <button type="button" class="toggle-btn active" id="btnAluno" onclick="mudarPerfil('aluno')">Sou Aluno</button>
-      <button type="button" class="toggle-btn" id="btnInstrutor" onclick="mudarPerfil('instrutor')">Sou Instrutor</button>
-    </div>
+  <!-- ================= TELA DE LOGIN ================= -->
+  <div id="telaLogin" class="min-h-screen flex items-center justify-center p-4 relative z-10" style="background-color: var(--bg-page);">
+    <div class="w-full max-w-md p-8 rounded-3xl shadow-2xl flex flex-col items-center relative z-20" style="background-color: var(--bg-card);">
+      <div class="text-3xl font-black text-white tracking-wider mb-2">CFC<span style="color: var(--highlight);">da Lu</span></div>
+      <p class="text-slate-300 text-xs font-semibold mb-6 text-center">Portal de Ensino Prático</p>
 
-    <form id="formLogin" onsubmit="realizarLogin(event)" style="width: 100%;">
-      <div class="form-group">
-        <label class="form-label" id="labelTelefone">Telefone do Aluno</label>
-        <div class="input-wrapper">
-          <svg fill="none" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
-          </svg>
-          <input type="text" id="campoTelefone" class="input-field" placeholder="(11) 97638-7110" required oninput="aplicarMascaraTelefone(this)">
-        </div>
+      <div class="w-full bg-black/40 p-1.5 rounded-2xl flex gap-1.5 mb-6 border border-white/10 relative z-30">
+        <button id="btnTabAluno" type="button" onclick="trocarPerfilLogin('aluno')" class="tab-login-btn flex-1 py-3 rounded-xl text-xs font-black text-white shadow-lg transition select-none cursor-pointer" style="background-color: var(--btn-color);">Sou Aluno</button>
+        <button id="btnTabInstrutor" type="button" onclick="trocarPerfilLogin('instrutor')" class="tab-login-btn flex-1 py-3 rounded-xl text-xs font-black text-teal-300 hover:text-white transition select-none bg-transparent cursor-pointer">Sou Instrutor</button>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Senha de Acesso</label>
-        <div class="input-wrapper">
-          <svg fill="none" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-          </svg>
-          <input type="password" id="campoSenha" class="input-field" placeholder="Digite sua senha" required>
+      <form id="formLogin" onsubmit="realizarLogin(event)" class="w-full space-y-4 relative z-20">
+        <div>
+          <label class="block text-xs font-bold text-white uppercase mb-1" id="lblDoc">CPF ou Celular do Usuário</label>
+          <input id="inputDoc" type="text" required placeholder="000.000.000-00 ou Celular" class="w-full h-12 px-4 rounded-xl font-semibold text-sm outline-none" style="background-color: var(--input-bg); color: var(--input-text);">
         </div>
-      </div>
-
-      <div class="hint-text" id="labelDicaSenha">Dica: Por padrão, a sua senha são os 4 primeiros dígitos do celular (sem DDD).</div>
-
-      <button type="submit" id="btnSubmit" class="submit-btn">
-        <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-        </svg>
-        <span id="btnSubmitTexto">Acessar o Painel</span>
-      </button>
-    </form>
-
-    <div class="divider"></div>
-    <div class="footer-text">© 2026 Previa Treinamentos</div>
+        <div>
+          <label class="block text-xs font-bold text-white uppercase mb-1">Senha de Acesso</label>
+          <input id="inputSenha" type="password" required placeholder="Digite sua senha" class="w-full h-12 px-4 rounded-xl font-semibold text-sm outline-none" style="background-color: var(--input-bg); color: var(--input-text);">
+          <p id="txtDica" class="text-[11px] text-slate-400 mt-1">Dica: Por padrão, a sua senha são os 4 primeiros dígitos do CPF ou Celular.</p>
+        </div>
+        <button type="submit" id="btnEntrar" class="w-full h-12 rounded-xl text-sm font-bold text-white shadow-lg mt-2 flex items-center justify-center gap-2 transition cursor-pointer" style="background-color: var(--btn-color);">Acessar o Painel</button>
+      </form>
+    </div>
   </div>
 
+  <!-- ================= PAINEL DO SISTEMA ================= -->
+  <div id="telaDashboard" class="hidden min-h-screen flex flex-col md:flex-row relative z-10">
+    <aside id="sidebarMenu" class="sidebar w-full md:w-64 flex flex-col justify-between p-6 border-r border-white/10 sidebar-transition flex-shrink-0" style="background-color: var(--bg-card); color: white;">
+      <div class="space-y-6">
+        <div class="flex items-center justify-between">
+          <div class="text-xl font-black tracking-wider hide-collapsed">CFC<span style="color: var(--highlight);">da Lu</span></div>
+          <button type="button" onclick="alternarRecolherSidebar()" class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-black" style="background-color: var(--btn-color);">&lt;&gt;</button>
+        </div>
+        <div class="p-3 bg-black/25 rounded-2xl border border-white/10 flex items-center gap-3">
+          <div class="avatar-circle w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white flex-shrink-0" style="background-color: var(--btn-color);" id="badgeIniciais">AS</div>
+          <div class="overflow-hidden hide-collapsed">
+            <div class="text-xs font-bold truncate" id="sideNomeUsuario">Carregando...</div>
+            <div class="text-[10px] text-teal-300 font-semibold" id="sideStatusUsuario">● Aluno Ativo</div>
+          </div>
+        </div>
+        
+        <nav id="menuNavAluno" class="space-y-1.5">
+          <button type="button" id="btnNav_relatorio" onclick="navegarParaAba('relatorio')" class="menu-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition text-white" style="background-color: var(--btn-color);"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span class="hide-collapsed">Relatório Geral</span></button>
+          <button type="button" id="btnNav_agendar" onclick="navegarParaAba('agendar')" class="menu-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition text-slate-300 hover:bg-white/5"><i data-lucide="calendar-plus" class="w-4 h-4"></i><span class="hide-collapsed">Agendar Aula</span></button>
+          <button type="button" id="btnNav_historico" onclick="navegarParaAba('historico')" class="menu-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition text-slate-300 hover:bg-white/5"><i data-lucide="history" class="w-4 h-4"></i><span class="hide-collapsed">Histórico & Notas</span></button>
+          <button type="button" id="btnNav_ead" onclick="navegarParaAba('ead')" class="menu-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition text-slate-300 hover:bg-white/5"><i data-lucide="graduation-cap" class="w-4 h-4"></i><span class="hide-collapsed">Cursos & Aulas EAD</span></button>
+        </nav>
+        
+        <nav id="menuNavInstrutor" class="hidden space-y-1.5">
+          <button type="button" id="btnNav_agenda_inst" onclick="navegarParaAba('agenda_inst')" class="menu-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition text-white" style="background-color: var(--btn-color);"><i data-lucide="calendar" class="w-4 h-4"></i><span class="hide-collapsed">Minha Agenda</span></button>
+          <button type="button" id="btnNav_cadastro_aluno" onclick="navegarParaAba('cadastro_aluno')" class="menu-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition text-slate-300 hover:bg-white/5"><i data-lucide="user-plus" class="w-4 h-4"></i><span class="hide-collapsed">Cadastrar Novo Aluno</span></button>
+          <button type="button" id="btnNav_ferramentas" onclick="navegarParaAba('ferramentas')" class="menu-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition text-slate-300 hover:bg-white/5"><i data-lucide="wrench" class="w-4 h-4"></i><span class="hide-collapsed">Ferramentas & Cursos</span></button>
+        </nav>
+      </div>
+      <div class="space-y-2">
+        <button type="button" onclick="fazerLogout()" class="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold text-rose-400 hover:bg-rose-500/10 rounded-xl transition"><i data-lucide="log-out" class="w-4 h-4"></i><span class="hide-collapsed">Sair do Sistema</span></button>
+      </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col min-w-0 bg-slate-50 overflow-y-auto">
+      <header class="bg-white border-b border-slate-200 py-3.5 px-4 sm:px-8 flex flex-wrap justify-between items-center sticky top-0 z-30 gap-3">
+        <div class="flex items-center gap-3">
+          <h2 id="topoTituloSecao" class="text-sm sm:text-base font-extrabold text-slate-900 uppercase truncate">MINHA AGENDA PRÁTICA</h2>
+          <button type="button" onclick="atualizarDadosGerais()" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-1.5 transition"><i data-lucide="rotate-cw" class="w-3.5 h-3.5 text-teal-700"></i> Atualizar</button>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="text-right hidden sm:block">
+            <div class="text-[9px] text-slate-400 font-bold uppercase">Instrutor Vinculado</div>
+            <div class="text-xs font-extrabold text-teal-700" id="topoNomeInstrutor">Amauri de Souza</div>
+            <div class="text-[10px] text-slate-500 font-semibold" id="topoVeiculoInstrutor">Veículo: Ford Ka</div>
+            <button type="button" onclick="abrirModalSaibaMais()" class="text-[10px] font-bold text-[var(--btn-color)] hover:underline block ml-auto mt-0.5">Saiba mais sobre seu instrutor</button>
+          </div>
+          <span class="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[11px] font-bold">Servidor Conectado</span>
+        </div>
+      </header>
+
+      <div class="p-4 sm:p-6 max-w-7xl w-full mx-auto space-y-6">
+
+        <!-- ABA INSTRUTOR COM OS 3 CARDS NATIVOS -->
+        <section id="aba_agenda_inst" class="space-y-6 hidden">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+              <div class="p-3 bg-teal-50 text-teal-700 rounded-xl flex-shrink-0"><i data-lucide="users" class="w-6 h-6"></i></div>
+              <div>
+                <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider block">Alunos Atendidos</span>
+                <div class="text-2xl font-black text-slate-900 mt-0.5" id="dashInstTotalAlunos">0</div>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+              <div class="p-3 bg-emerald-50 text-emerald-700 rounded-xl flex-shrink-0"><i data-lucide="check-circle-2" class="w-6 h-6"></i></div>
+              <div>
+                <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider block">Aulas Aplicadas</span>
+                <div class="text-2xl font-black text-emerald-600 mt-0.5" id="dashInstAulasConcluidas">0</div>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+              <div class="p-3 bg-orange-50 text-orange-600 rounded-xl flex-shrink-0"><i data-lucide="calendar-clock" class="w-6 h-6"></i></div>
+              <div>
+                <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider block">Aulas Agendadas</span>
+                <div class="text-2xl font-black text-orange-500 mt-0.5" id="dashInstAulasAgendadas">0</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cal-card shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-3">
+              <div class="font-black text-sm text-slate-900 uppercase flex items-center gap-2"><i data-lucide="calendar" class="w-4 h-4 text-teal-700"></i><span id="calMesAnoInstrutor">Mês Atual</span></div>
+              <div class="flex items-center gap-4 text-xs font-bold"><span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> Sem Aulas</span><span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-orange-500"></span> Com Aulas</span></div>
+              <div class="flex gap-2">
+                <button type="button" onclick="abrirModalLiberarHorario()" class="px-3 py-1.5 text-white text-xs font-bold rounded-lg shadow transition" style="background-color: var(--btn-color);">➕ Liberar Horários</button>
+                <button type="button" onclick="carregarAgendaInstrutor(true)" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition">Ver Todas</button>
+              </div>
+            </div>
+            <div class="cal-grid-header"><div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div></div>
+            <div class="cal-grid-days" id="calDiasInstrutorGrid"></div>
+          </div>
+
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div><h3 class="text-sm font-black text-slate-900 uppercase" id="tituloAgendaInstrutor">AULAS AGENDADAS</h3><p class="text-xs text-slate-500">Histórico de aulas agendadas e concluídas.</p></div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 border-b"><tr><th class="p-3 font-bold text-slate-600 uppercase">ESTUDANTE</th><th class="p-3 font-bold text-slate-600 uppercase">AULA / TIPO</th><th class="p-3 font-bold text-slate-600 uppercase">DATA / HORÁRIO</th><th class="p-3 font-bold text-slate-600 uppercase">STATUS</th><th class="p-3 font-bold text-slate-600 uppercase">AÇÕES</th></tr></thead>
+                <tbody id="tabelaAgendaInstrutorCorpo" class="divide-y"><tr><td colspan="5" class="p-4 text-center text-slate-400">Carregando aulas...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ABA RELATÓRIO DO ALUNO -->
+        <section id="aba_relatorio" class="space-y-6 hidden">
+          <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-2xl flex items-start gap-3"><i data-lucide="shield-alert" class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"></i><div><div class="text-xs font-bold text-amber-950 uppercase">Aviso de Segurança Crítico para o Aluno</div><div class="text-xs text-amber-900 mt-1">Para sua total segurança pessoal: <b>NUNCA entre em qualquer veículo de treinamento</b> sem antes validar visualmente as informações acima!</div></div></div>
+          
+          <div class="p-8 rounded-3xl bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-100"><span class="px-3 py-1 bg-white text-xs font-bold uppercase rounded-full shadow-sm" style="color: var(--btn-color);">Portal de Aulas</span><h1 class="text-2xl font-extrabold text-slate-900 mt-2" id="boxBoasVindas">Olá, Aluno!</h1><p class="text-slate-600 text-sm mt-1">Gerencie suas aulas e acompanhe seu desenvolvimento prático em tempo real.</p></div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm"><span class="text-[10px] font-bold text-slate-400 uppercase">Telefone</span><div class="text-sm font-bold text-slate-900 mt-1" id="boxTelefone">--</div></div><div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm"><span class="text-[10px] font-bold text-slate-400 uppercase">E-mail Cadastrado</span><div class="text-sm font-bold text-slate-900 mt-1 truncate" id="boxEmail">--</div></div><div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm"><span class="text-[10px] font-bold text-slate-400 uppercase">Endereço Registrado</span><div class="text-sm font-bold text-slate-900 mt-1 truncate" id="boxEndereco">--</div></div></div>
+          
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3"><div class="flex items-center gap-2 text-sm font-bold text-slate-900 uppercase"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i> Instrutor Vinculado e Veículo Oficial</div><div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-50 p-4 rounded-xl border border-slate-200 gap-4"><div><div class="text-xs font-bold text-slate-400 uppercase">Instrutor do Aluno</div><div class="text-sm font-bold text-slate-900" id="cardInstrutorNome">--</div><div class="text-xs text-teal-700 font-semibold mt-0.5" id="cardInstrutorCarro">Veículo cadastrado: --</div></div><button type="button" onclick="abrirModalSaibaMais()" class="px-4 py-2 bg-white border border-[var(--btn-color)] text-[var(--btn-color)] rounded-xl text-xs font-bold hover:bg-orange-50 transition">Saiba Mais / Ver Foto</button></div></div>
+        </section>
+
+        <!-- ABA AGENDAR VAGAS -->
+        <section id="aba_agendar" class="hidden space-y-6">
+          <div class="cal-card shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-3">
+              <div class="font-black text-sm text-slate-900 uppercase flex items-center gap-2">
+                <i data-lucide="calendar" class="w-4 h-4 text-teal-700"></i>
+                <span id="calMesAnoAluno">Mês Atual</span>
+              </div>
+              <div class="flex flex-wrap items-center gap-4 text-xs font-bold">
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> Dias Livres</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-orange-500"></span> Minhas Aulas</span>
+              </div>
+              <button type="button" onclick="carregarVagasAluno(true)" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition">Ver Todos os Horários</button>
+            </div>
+            <div class="cal-grid-header"><div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div></div>
+            <div class="cal-grid-days" id="calDiasAlunoGrid"></div>
+          </div>
+
+          <div id="boxMinhasAulasNesteDia" class="hidden bg-orange-50 p-5 rounded-2xl border border-orange-200 space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="text-xs font-black uppercase text-orange-950 flex items-center gap-2">
+                <i data-lucide="calendar-check" class="w-4 h-4 text-orange-600"></i>
+                <span id="tituloMinhasAulasDia">Sua Aula Agendada Neste Dia</span>
+              </div>
+              <button type="button" onclick="fecharBoxMinhasAulasDia()" class="text-orange-400 hover:text-orange-700"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div id="listaMinhasAulasDia" class="text-xs text-orange-900 font-semibold space-y-1"></div>
+          </div>
+
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div>
+              <h3 class="text-sm font-black text-slate-900 uppercase" id="tituloVagasAluno">HORÁRIOS DISPONÍVEIS</h3>
+              <p class="text-xs text-slate-500">Selecione o horário desejado e agende sua aula de direção prática.</p>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 border-b">
+                  <tr>
+                    <th class="p-3 font-bold text-slate-600 uppercase">Data</th>
+                    <th class="p-3 font-bold text-slate-600 uppercase">Horário</th>
+                    <th class="p-3 font-bold text-slate-600 uppercase">Instrutor / Local</th>
+                    <th class="p-3 font-bold text-slate-600 uppercase">Tipo Sugerido</th>
+                    <th class="p-3 font-bold text-slate-600 uppercase">Ação</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelaVagasAlunoCorpo" class="divide-y">
+                  <tr><td colspan="5" class="p-4 text-center text-slate-400">Carregando horários disponíveis...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ABA HISTÓRICO -->
+        <section id="aba_historico" class="hidden space-y-6">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">AULAS PRÁTICAS TOTAIS</span>
+              <div class="text-3xl font-black text-slate-900 mt-2" id="metricasTotalAulas">0</div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">AULAS CONCLUÍDAS</span>
+              <div class="text-3xl font-black text-emerald-600 mt-2" id="metricasConcluidas">0</div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">MÉDIA GERAL</span>
+              <div class="text-3xl font-black text-orange-500 mt-2" id="metricasMediaGeral">0.0</div>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-50 border-b"><tr><th class="p-4 font-bold text-slate-600 uppercase">AULA</th><th class="p-4 font-bold text-slate-600 uppercase">DATA & HORÁRIO</th><th class="p-4 font-bold text-slate-600 uppercase">INSTRUTOR / LOCAL / VEÍCULO</th><th class="p-4 font-bold text-slate-600 uppercase">STATUS / NOTA</th><th class="p-4 font-bold text-slate-600 uppercase">AÇÕES</th></tr></thead><tbody id="tabelaHistoricoAlunoCorpo" class="divide-y divide-slate-100"><tr><td colspan="5" class="p-6 text-center text-slate-400">Carregando histórico...</td></tr></tbody></table></div></div>
+        </section>
+
+        <!-- ABA EAD (ALUNO) -->
+        <section id="aba_ead" class="hidden space-y-6">
+          <div><h3 class="text-base font-extrabold text-slate-900 uppercase tracking-wide">Cursos & Aulas EAD Matriculados</h3><p class="text-xs text-slate-500 mt-1">Materiais teóricos e aulas virtuais atribuídas ao seu cadastro.</p></div>
+          <div id="gridCursosEADCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"><div class="col-span-full p-8 text-center text-slate-400">Carregando cursos matriculados...</div></div>
+          <div id="boxPlayerCursoEAD" class="hidden space-y-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm"><div class="flex justify-between items-center border-b pb-3"><h4 id="tituloPlayerCurso" class="text-sm font-extrabold text-slate-900">Aula em Andamento</h4><button type="button" onclick="fecharPlayerCursoEAD()" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700">← Voltar aos Cursos</button></div><div class="w-full h-[70vh] rounded-2xl overflow-hidden bg-slate-900 shadow-inner"><iframe id="iframeCursoEAD" class="w-full h-full" src="" frameborder="0" allowfullscreen></iframe></div></div>
+        </section>
+
+        <!-- ABA CADASTRO DE ALUNOS -->
+        <section id="aba_cadastro_aluno" class="hidden space-y-6">
+          <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm max-w-2xl mx-auto space-y-6">
+            <div class="border-b pb-4"><h3 class="text-lg font-black text-slate-900 uppercase">Cadastrar Novo Aluno</h3><p class="text-xs text-slate-500 mt-1">Preencha as informações para registrar o aluno no sistema vinculado ao seu perfil.</p></div>
+            <form onsubmit="salvarNovoAlunoPeloInstrutor(event)" class="space-y-4">
+              <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nome Completo</label><input type="text" id="cadNome" required class="w-full h-11 px-4 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-orange-500" placeholder="Ex: João da Silva"></div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">CPF ou Celular (Login do Aluno)</label><input type="text" id="cadCpf" required class="w-full h-11 px-4 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-orange-500" placeholder="000.000.000-00 ou Celular"></div>
+                <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Telefone / WhatsApp</label><input type="text" id="cadTelefone" class="w-full h-11 px-4 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-orange-500" placeholder="(11) 90000-0000"></div>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Senha de Acesso</label><input type="text" id="cadSenha" class="w-full h-11 px-4 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-orange-500" placeholder="Deixe em branco para usar os 4 primeiros dígitos"></div>
+                <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">E-mail</label><input type="email" id="cadEmail" class="w-full h-11 px-4 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-orange-500" placeholder="aluno@email.com"></div>
+              </div>
+              <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Endereço Residencial</label><input type="text" id="cadEndereco" class="w-full h-11 px-4 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-orange-500" placeholder="Rua, número, bairro e cidade"></div>
+              <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Instrutor Vinculado</label><input type="text" id="cadInstrutor" class="w-full h-11 px-4 border border-slate-200 rounded-xl text-xs font-semibold outline-none bg-slate-50" readonly></div>
+              <button type="submit" id="btnSalvarAluno" class="w-full py-3.5 text-white font-bold text-xs rounded-xl shadow-lg mt-4 flex items-center justify-center gap-2" style="background-color: var(--btn-color);"><span>💾 Salvar Aluno</span></button>
+            </form>
+          </div>
+        </section>
+
+        <!-- ABA FERRAMENTAS & CURSOS (INSTRUTOR) -->
+        <section id="aba_ferramentas" class="space-y-6 hidden">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+              <div class="p-3 bg-teal-50 text-teal-700 rounded-xl flex-shrink-0"><i data-lucide="book-open" class="w-6 h-6"></i></div>
+              <div>
+                <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider block">Total de Materiais</span>
+                <div class="text-2xl font-black text-slate-900 mt-0.5" id="dashTotalCursos">0</div>
+              </div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+              <div class="p-3 bg-emerald-50 text-emerald-700 rounded-xl flex-shrink-0"><i data-lucide="user-check" class="w-6 h-6"></i></div>
+              <div>
+                <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider block">Total de Matrículas</span>
+                <div class="text-2xl font-black text-emerald-600 mt-0.5" id="dashTotalMatriculas">0</div>
+              </div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+              <div class="p-3 bg-orange-50 text-orange-600 rounded-xl flex-shrink-0"><i data-lucide="globe" class="w-6 h-6"></i></div>
+              <div>
+                <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider block">Cursos Gerais (Todos)</span>
+                <div class="text-2xl font-black text-orange-500 mt-0.5" id="dashTotalAbertos">0</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2 text-xs font-extrabold uppercase text-slate-800">
+                <i data-lucide="user-search" class="w-4 h-4 text-teal-700"></i>
+                <span>Consultar Matrículas de Seus Alunos</span>
+              </div>
+              <span id="badgeResultadoAlunoCursos" class="text-[11px] font-bold text-teal-800 bg-teal-50 border border-teal-200 px-3 py-1 rounded-full">Digite para consultar</span>
+            </div>
+            <div class="relative w-full">
+              <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3 text-slate-400"></i>
+              <input type="text" id="filtroConsultaPorAluno" oninput="consultarCursosDoAlunoEspecifico()" placeholder="Digite o nome ou celular do seu aluno para ver os cursos dele..." class="w-full h-10 pl-10 pr-4 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-teal-700">
+            </div>
+            <div id="resultadoListaCursosAluno" class="hidden p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-2"></div>
+          </div>
+
+          <!-- BARRA DE AÇÕES -->
+          <div class="flex flex-col lg:flex-row justify-between items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="relative w-full lg:w-80">
+              <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3 text-slate-400"></i>
+              <input type="text" id="filtroPesquisaCursos" oninput="filtrarMateriaisNaTela()" placeholder="Pesquisar por nome de curso ou categoria..." class="w-full h-10 pl-10 pr-4 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-orange-500">
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
+              <button type="button" onclick="abrirModalCriarAvaliacao()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-2 cursor-pointer">
+                <i data-lucide="file-plus-2" class="w-4 h-4"></i>
+                <span>Criar Avaliação / Critérios</span>
+              </button>
+              
+              <!-- [EXCLUSIVO ADMIN MASTER]: Botão Cadastrar Novo Curso / Ferramenta -->
+              <button type="button" id="btnNovoCursoMaterial" onclick="abrirModalCadastrarMaterial()" class="hidden px-4 py-2.5 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-2 cursor-pointer" style="background-color: var(--btn-color);">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                <span>Novo Curso / Ferramenta</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="gridFerramentasCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="col-span-full p-8 text-center text-slate-400">Carregando ferramentas e cursos...</div>
+          </div>
+
+          <div id="boxPlayerFerramenta" class="hidden space-y-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <div class="flex justify-between items-center border-b pb-3">
+              <h4 id="tituloPlayerFerramenta" class="text-sm font-extrabold text-slate-900">Visualização de Conteúdo</h4>
+              <button type="button" onclick="fecharPlayerFerramenta()" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700">← Voltar à Lista</button>
+            </div>
+            <div class="w-full h-[75vh] rounded-2xl overflow-hidden bg-slate-900 shadow-inner">
+              <iframe id="iframeFerramenta" class="w-full h-full" src="" frameborder="0" allowfullscreen></iframe>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <div id="bannerInstalacaoApp" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md bg-black text-white p-4 rounded-2xl shadow-2xl border border-white/10 hidden flex-col sm:flex-row items-center justify-between gap-3 transition-all duration-300">
+    <div class="text-xs font-bold text-center sm:text-left">
+      Deseja instalar o aplicativo oficial para acesso rápido?
+    </div>
+    <div class="flex items-center gap-3 w-full sm:w-auto justify-center">
+      <button type="button" onclick="acionarInstalacaoApp()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-black font-extrabold text-xs rounded-xl shadow transition cursor-pointer flex-1 sm:flex-none text-center">
+        Instalar Aplicativo
+      </button>
+      <button type="button" onclick="fecharBannerInstalacaoApp()" class="text-xs text-slate-400 hover:text-white font-semibold cursor-pointer">
+        Agora não
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: CRIAR NOVA AVALIAÇÃO PRÁTICA COM CRITÉRIOS DINÂMICOS -->
+  <div id="modalCriarAvaliacao" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-200 p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-xl w-full p-6 relative transform scale-95 transition-transform duration-200 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b pb-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="file-spreadsheet" class="w-5 h-5 text-emerald-600"></i>
+          <h3 class="text-sm font-extrabold uppercase tracking-wide text-slate-800">Criar Nova Avaliação Prática</h3>
+        </div>
+        <button type="button" onclick="fecharModalCriarAvaliacao()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form onsubmit="salvarNovaAvaliacaoComCriterios(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Título do Modelo de Aula / Avaliação</label>
+          <input type="text" id="novaAvNomeModelo" required placeholder="Ex: Simulado de Exame Prático Detran" class="w-full h-11 px-3 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-emerald-600">
+          <span class="text-[10px] text-slate-400 mt-1 block">Este nome aparecerá para os alunos agendarem e para você avaliar com cálculo automático.</span>
+        </div>
+
+        <div class="space-y-3 pt-2">
+          <div class="flex justify-between items-center">
+            <label class="block text-xs font-bold text-slate-700 uppercase">Critérios Pedagógicos de Avaliação (Notas 2,5 a 10,0)</label>
+            <button type="button" onclick="adicionarLinhaCriterioNovaAvaliacao()" class="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Mais Critério
+            </button>
+          </div>
+
+          <div id="containerListaCriteriosNovos" class="space-y-2 max-h-52 overflow-y-auto p-2 border border-slate-100 rounded-2xl bg-slate-50"></div>
+        </div>
+
+        <div class="bg-amber-50 p-3 rounded-2xl border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+          ⚡ <b>Efeito Automático:</b> Esta avaliação já incluirá a checagem comportamental padrão e a ponderação de nota com parecer pedagógico pronto para PDF e WhatsApp.
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2 border-t">
+          <button type="button" onclick="fecharModalCriarAvaliacao()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-xl">Cancelar</button>
+          <button type="submit" id="btnSalvarNovaAvaliacao" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-lg transition">
+            💾 Gravar Avaliação no Firebase
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CADASTRAR NOVO CURSO / FERRAMENTA EDUCACIONAL (EXCLUSIVO MASTER) -->
+  <div id="modalCadastrarMaterial" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-200 p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 relative transform scale-95 transition-transform duration-200 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="text-sm font-extrabold uppercase tracking-wide text-slate-800">Cadastrar Novo Curso ou Ferramenta (Master)</h3>
+        <button type="button" onclick="fecharModalCadastrarMaterial()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="salvarNovoMaterial(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Título do Curso / Ferramenta</label>
+          <input type="text" id="matTitulo" required placeholder="Ex: Direção Defensiva na Chuva" class="w-full h-11 px-3 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-orange-500">
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Categoria</label>
+            <input type="text" id="matCategoria" required value="Teórico" placeholder="Ex: Teórico, Simulador, Baliza" class="w-full h-11 px-3 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-orange-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Acesso Padrão Alunos</label>
+            <select id="matAcessoInicial" class="w-full h-11 px-3 border border-slate-200 rounded-xl text-xs font-semibold outline-none">
+              <option value="todos">Liberado para Todos os Alunos</option>
+              <option value="especifico">Matricular Alunos Manualmente</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Acesso Inicial para Instrutores</label>
+          <select id="matAcessoInstrutoresInicial" class="w-full h-11 px-3 border border-slate-200 rounded-xl text-xs font-semibold outline-none">
+            <option value="todos">Liberado para Todos os Instrutores</option>
+            <option value="especifico">Liberar Instrutores Manualmente</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Breve Descrição</label>
+          <textarea id="matDescricao" rows="2" required placeholder="Explicação sucinta do que o aluno aprenderá..." class="w-full p-3 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-orange-500"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">URL da Imagem de Capa</label>
+          <input type="url" id="matCapa" required placeholder="https://..." value="https://images.unsplash.com/photo-1516321497487-e288fb19713f?w=600&auto=format&fit=crop&q=80" class="w-full h-11 px-3 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-orange-500">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">URL do Vídeo / Conteúdo Interativo (Embed)</label>
+          <input type="url" id="matUrl" required placeholder="https://www.youtube.com/embed/... ou link web" class="w-full h-11 px-3 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-orange-500">
+        </div>
+        <button type="submit" id="btnSalvarMaterial" class="w-full py-3 text-white font-bold text-xs rounded-xl shadow-lg mt-2" style="background-color: var(--btn-color);">💾 Gravar no Firebase</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: GERENCIAR MATRÍCULAS DO CURSO (ALUNOS) -->
+  <div id="modalGerenciarMatriculas" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-200 p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 relative transform scale-95 transition-transform duration-200 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-start border-b pb-3">
+        <div>
+          <h3 class="text-sm font-extrabold uppercase tracking-wide text-slate-800">MATRICULAR ALUNOS NO CURSO</h3>
+          <p id="matCursoTituloSub" class="text-xs text-teal-700 font-semibold mt-0.5">--</p>
+        </div>
+        <button type="button" onclick="fecharModalMatriculas()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <input type="hidden" id="matDocIdCurso">
+      <div class="flex items-center gap-2 p-3 bg-orange-50 border border-orange-200 rounded-xl">
+        <input type="checkbox" id="chkTodosAlunos" onchange="alternarMarcarTodos(this.checked)" class="w-4 h-4 text-orange-600 rounded cursor-pointer">
+        <label for="chkTodosAlunos" class="text-xs font-bold text-orange-950 cursor-pointer">Liberar este curso para TODOS os seus alunos</label>
+      </div>
+
+      <div class="space-y-2">
+        <div class="flex justify-between items-center">
+          <div class="text-[10px] font-bold uppercase text-slate-400">SELECIONE SEUS ALUNOS VINCULADOS:</div>
+          <span id="contagemAlunosFiltrados" class="text-[10px] font-bold text-slate-500"></span>
+        </div>
+        <div class="relative w-full">
+          <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400"></i>
+          <input type="text" id="filtroAlunoNoModal" oninput="filtrarAlunosNoModalMatricula()" placeholder="Buscar aluno por nome ou celular..." class="w-full h-9 pl-9 pr-3 rounded-lg border border-slate-200 text-xs font-semibold outline-none focus:border-orange-500">
+        </div>
+        <div id="listaAlunosCheckboxes" class="max-h-56 overflow-y-auto border border-slate-200 rounded-xl p-2 space-y-1 divide-y divide-slate-100">
+          <div class="p-3 text-center text-xs text-slate-400">Carregando seus alunos vinculados...</div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-3 border-t">
+        <button type="button" onclick="fecharModalMatriculas()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-xl">Cancelar</button>
+        <button type="button" id="btnSalvarMatriculas" onclick="salvarMatriculasNoFirebase()" class="px-5 py-2.5 text-white font-bold text-xs rounded-xl shadow-lg" style="background-color: var(--btn-color);">Salvar Matrículas</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: LIBERAR CURSOS PARA INSTRUTORES (EXCLUSIVO MASTER) -->
+  <div id="modalMatriculasInstrutores" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-200 p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 relative transform scale-95 transition-transform duration-200 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-start border-b pb-3">
+        <div>
+          <h3 class="text-sm font-extrabold uppercase tracking-wide text-slate-800">CADASTRAR INSTRUTOR NO CURSO</h3>
+          <p id="matInstCursoTituloSub" class="text-xs text-teal-700 font-semibold mt-0.5">Selecione os instrutores autorizados</p>
+        </div>
+        <button type="button" onclick="fecharModalLiberarParaInstrutores()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      
+      <input type="hidden" id="matDocIdCursoInstrutor">
+
+      <div class="flex items-center gap-2 p-3 bg-teal-50 border border-teal-200 rounded-xl">
+        <input type="checkbox" id="chkTodosInstrutores" onchange="alternarMarcarTodosInstrutores(this.checked)" class="w-4 h-4 text-teal-600 rounded cursor-pointer">
+        <label for="chkTodosInstrutores" class="text-xs font-bold text-teal-950 cursor-pointer">Liberar este curso para TODOS os instrutores</label>
+      </div>
+
+      <div class="space-y-2">
+        <div class="flex justify-between items-center">
+          <div class="text-[10px] font-bold uppercase text-slate-400">SELECIONE OS INSTRUTORES:</div>
+          <span id="contagemInstrutoresFiltrados" class="text-[10px] font-bold text-slate-500"></span>
+        </div>
+        <div class="relative w-full">
+          <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400"></i>
+          <input type="text" id="filtroInstrutorNoModal" oninput="filtrarInstrutoresNoModal()" placeholder="Buscar instrutor por nome..." class="w-full h-9 pl-9 pr-3 rounded-lg border border-slate-200 text-xs font-semibold outline-none focus:border-teal-700">
+        </div>
+        <div id="listaInstrutoresCheckboxes" class="max-h-56 overflow-y-auto border border-slate-200 rounded-xl p-2 space-y-1 divide-y divide-slate-100">
+          <div class="p-3 text-center text-xs text-slate-400">Carregando instrutores...</div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-3 border-t">
+        <button type="button" onclick="fecharModalLiberarParaInstrutores()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-xl">Cancelar</button>
+        <button type="button" id="btnSalvarMatriculasInstrutores" onclick="salvarLiberacaoInstrutoresNoFirebase()" class="px-5 py-2.5 text-white font-bold text-xs rounded-xl shadow-lg" style="background-color: var(--btn-color);">Salvar Liberação</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SAIBA MAIS SOBRE O INSTRUTOR -->
+  <div id="modalSaibaMaisInstrutor" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-200 p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-8 relative transform scale-95 transition-transform duration-200 max-h-[90vh] overflow-y-auto">
+      <button type="button" onclick="fecharModalSaibaMais()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-600 p-1.5 rounded-lg"><i data-lucide="x" class="w-5 h-5"></i></button>
+      <div class="text-center space-y-4">
+        <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-3">SAIBA MAIS SOBRE O SEU INSTRUTOR</h3>
+        <div class="relative w-28 h-28 mx-auto rounded-full overflow-hidden border-4 border-teal-50 shadow-inner bg-slate-100 flex items-center justify-center">
+          <img id="modalInstFoto" src="" class="w-full h-full object-cover hidden">
+          <div id="modalInstAvatarFallback" class="text-teal-700"><i data-lucide="user-round" class="w-16 h-16"></i></div>
+        </div>
+        <div>
+          <h4 id="modalInstNome" class="text-lg font-bold text-slate-900">Amauri de Souza</h4>
+          <span id="modalInstVeiculo" class="inline-block text-xs font-semibold text-teal-800 bg-teal-50 border border-teal-100 rounded-full px-3 py-1 mt-1">🚗 Veículo: Ford Ka</span>
+        </div>
+        <div class="text-left pt-2 space-y-2">
+          <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">HISTÓRICO PROFISSIONAL</div>
+          <p id="modalInstResumo" class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100 text-justify">Profissional com vasta experiência no setor de trânsito, especializado em desenvolvimento prático e direção defensiva.</p>
+        </div>
+        <button type="button" onclick="fecharModalSaibaMais()" class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition mt-4">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: LIBERAR HORÁRIO -->
+  <div id="modalLiberarHorario" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-200 p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 relative transform scale-95 transition-transform duration-200 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b pb-3 mb-4"><h3 class="text-sm font-extrabold uppercase tracking-wide text-slate-800">Liberar Horário na Agenda</h3><button type="button" onclick="fecharModalLiberarHorario()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+      <div class="flex gap-2 p-1 bg-slate-100 rounded-xl mb-4 text-xs font-bold">
+        <button type="button" id="tabModoIndividual" onclick="alternarModoLiberacao('individual')" class="flex-1 py-2 rounded-lg bg-white shadow-sm text-slate-900">Horário Avulso</button>
+        <button type="button" id="tabModoDiaTodo" onclick="alternarModoLiberacao('diatodo')" class="flex-1 py-2 rounded-lg text-slate-500 hover:text-slate-900">Dia Todo (Sem Almoço)</button>
+      </div>
+      <form id="formHorarioIndividual" onsubmit="salvarHorarioDisponivel(event)" class="space-y-4">
+        <div><label class="block text-xs font-bold text-slate-600 uppercase mb-1">Selecione a Data</label><input type="date" id="libData" required class="w-full h-11 px-3 border border-slate-200 rounded-xl text-xs font-semibold outline-none cursor-pointer"></div>
+        <div><label class="block text-xs font-bold text-slate-600 uppercase mb-1">Título da Aula</label><input type="text" id="libTitulo" required value="Baliza / Prática" class="w-full h-11 px-3 border border-slate-200 rounded-xl text-xs font-semibold outline-none"></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block text-xs font-bold text-slate-600 uppercase mb-1">Início</label><input type="time" id="libInicio" required value="08:00" class="w-full h-11 px-3 border rounded-xl text-xs font-semibold"></div>
+          <div><label class="block text-xs font-bold text-slate-600 uppercase mb-1">Fim</label><input type="time" id="libFim" required value="09:00" class="w-full h-11 px-3 border rounded-xl text-xs font-semibold"></div>
+        </div>
+        <div><label class="block text-xs font-bold text-slate-600 uppercase mb-1">Local de Encontro</label><input type="text" id="libLocal" required value="Local 1" class="w-full h-11 px-3 border rounded-xl text-xs font-semibold"></div>
+        <button type="submit" id="btnSalvarHorario" class="w-full py-3 text-white font-bold text-xs rounded-xl shadow-lg mt-2" style="background-color: var(--btn-color);">Salvar Horário</button>
+      </form>
+      <form id="formHorarioDiaTodo" onsubmit="salvarDiaTodoDisponivel(event)" class="space-y-4 hidden">
+        <div><label class="block text-xs font-bold text-slate-600 uppercase mb-1">Data a Liberar</label><input type="date" id="diaTodoData" required class="w-full h-11 px-3 border rounded-xl text-xs font-semibold cursor-pointer"></div>
+        <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 text-[11px] text-amber-900 leading-relaxed">☀️ <b>Turnos Automáticos:</b> O sistema gerará as aulas da Manhã (08h às 11h50) e Tarde (13h30 às 17h30) com pausa protegida para almoço.</div>
+        <div><label class="block text-xs font-bold text-slate-600 uppercase mb-1">Local Padrão</label><input type="text" id="dtLocal" required value="Local 1" class="w-full h-10 px-3 border rounded-xl text-xs font-semibold"></div>
+        <button type="submit" id="btnSalvarDiaTodo" class="w-full py-3 text-white font-bold text-xs rounded-xl shadow-lg mt-2" style="background-color: var(--btn-color);">⚡ Gerar Grade do Dia Todo</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIRMAR AGENDAMENTO (ALUNO) -->
+  <div id="modalConfirmarAgendamento" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-200 p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 relative transform scale-95 transition-transform duration-200 space-y-4">
+      <div class="flex justify-between items-center border-b pb-3"><h3 class="text-sm font-extrabold uppercase tracking-wide text-slate-800">Confirmar Agendamento</h3><button type="button" onclick="fecharModalConfirmarAgendamento()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+      <p id="txtResumoVaga" class="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">--</p>
+      <form onsubmit="confirmarAgendamentoPeloAluno(event)" class="space-y-4">
+        <div><label class="block text-xs font-bold text-slate-600 uppercase mb-1">Qual modelo de aula prática?</label><select id="selTipoAulaAluno" class="w-full h-11 px-3 border border-slate-200 rounded-xl text-xs font-semibold outline-none"></select></div>
+        <button type="submit" id="btnConfirmarVaga" class="w-full py-3 text-white font-bold text-xs rounded-xl shadow-lg" style="background-color: var(--btn-color);">Confirmar e Salvar no Histórico</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: FICHA DE AVALIAÇÃO PRÁTICA -->
+  <div id="modalFichaAvaliacao" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-200 p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-8 relative transform scale-95 transition-transform duration-200 max-h-[90vh] overflow-y-auto flex flex-col space-y-6">
+      <div class="flex justify-between items-start border-b pb-4"><div class="flex items-center gap-3"><div class="p-2.5 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100"><i data-lucide="file-spreadsheet" class="w-6 h-6"></i></div><div><h3 class="text-lg font-black text-slate-900">Ficha de Avaliação Prática</h3><p id="fichaSubtitulo" class="text-xs text-slate-500 font-semibold mt-0.5">Aula: -- • Data: --</p></div></div><button type="button" onclick="fecharModalFicha()" class="text-slate-400 hover:text-slate-600 p-1.5"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+      <div class="overflow-x-auto border border-slate-200 rounded-2xl"><table class="w-full text-left text-xs border-collapse"><thead><tr class="bg-slate-50 border-b text-slate-600"><th class="p-3 font-bold border-r">Categoria</th><th class="p-3 font-bold border-r">Conteúdo Pedagógico</th><th class="p-3 font-bold text-center border-r w-24">Insuficiente (2,5)</th><th class="p-3 font-bold text-center border-r w-20">Regular (5,0)</th><th class="p-3 font-bold text-center border-r w-20">Bom (7,5)</th><th class="p-3 font-bold text-center w-24">Muito bom (10,0)</th></tr></thead><tbody id="fichaCorpoPedagogico" class="divide-y divide-slate-100"></tbody></table></div>
+      <div class="space-y-2"><h4 class="text-xs font-black text-slate-900 uppercase">Avaliação Comportamental</h4><div class="overflow-x-auto border border-slate-200 rounded-2xl"><table class="w-full text-left text-xs border-collapse"><thead><tr class="bg-slate-50 border-b text-slate-600"><th class="p-3 font-bold border-r w-4/5">Comportamental</th><th class="p-3 font-bold text-center border-r w-24">Sim</th><th class="p-3 font-bold text-center w-24">Não</th></tr></thead><tbody id="fichaCorpoComportamental" class="divide-y divide-slate-100"></tbody></table></div></div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2 border-t"><div><span class="text-[10px] font-black text-slate-400 uppercase tracking-wider block">NOTA FINAL DA AULA</span><div id="fichaNotaFinal" class="text-3xl font-black text-orange-500 mt-1">10.0 / 10.0</div></div><div class="md:col-span-2"><span class="text-[10px] font-black text-slate-400 uppercase tracking-wider block">FEEDBACK GERAL DO INSTRUTOR</span><p id="fichaFeedbackInstrutor" class="text-xs text-slate-600 italic bg-slate-50 p-4 rounded-xl border border-slate-100 mt-1 leading-relaxed">--</p></div></div>
+      <div class="flex flex-wrap justify-between items-center gap-3 pt-2"><div class="flex items-center gap-2"><button type="button" id="btnVerEvidenciaNaAvaliacao" class="hidden px-4 py-2.5 bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200 rounded-xl text-xs font-bold flex items-center gap-2"><i data-lucide="camera" class="w-4 h-4"></i> Ver Evidência da Aula</button><button type="button" id="btnCompartilharFichaPdf" class="px-4 py-2.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-xl text-xs font-bold flex items-center gap-2"><i data-lucide="share-2" class="w-4 h-4"></i> Compartilhar no WhatsApp</button></div><button type="button" onclick="fecharModalFicha()" class="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl">Fechar Ficha</button></div>
+    </div>
+  </div>
+
+  <!-- MODAL: APLICAR AVALIAÇÃO PRÁTICA (INSTRUTOR) -->
+  <div id="modalAvaliarAula" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-200 p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-8 relative transform scale-95 transition-transform duration-200 max-h-[90vh] overflow-y-auto flex flex-col space-y-6">
+      <div class="flex justify-between items-start border-b pb-4"><div><h3 class="text-lg font-black text-slate-900">Aplicar Avaliação Prática</h3><p id="avSubtitulo" class="text-xs text-slate-500 font-semibold mt-0.5">Aluno: -- • Modelo: --</p></div><button type="button" onclick="fecharModalAvaliar()" class="text-slate-400 hover:text-slate-600 p-1.5"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+      <form id="formAvaliarPratica" onsubmit="enviarAvaliacaoPratica(event)" class="space-y-6">
+        <input type="hidden" id="avLinhaId">
+        <div class="overflow-x-auto border border-slate-200 rounded-2xl"><table class="w-full text-left text-xs border-collapse"><thead><tr class="bg-slate-100 border-b text-slate-700"><th class="p-3 font-bold border-r">Categoria</th><th class="p-3 font-bold border-r">Conteúdo Pedagógico</th><th class="p-3 font-bold text-center border-r">Insuficiente (2,5)</th><th class="p-3 font-bold text-center border-r">Regular (5,0)</th><th class="p-3 font-bold text-center border-r">Bom (7,5)</th><th class="p-3 font-bold text-center">Muito bom (10,0)</th></tr></thead><tbody id="avCorpoPedagogico" class="divide-y divide-slate-200"></tbody></table></div>
+        <div class="space-y-2"><h4 class="text-xs font-black text-slate-900 uppercase">Avaliação Comportamental</h4><div class="overflow-x-auto border border-slate-200 rounded-2xl"><table class="w-full text-left text-xs border-collapse"><thead><tr class="bg-slate-100 border-b text-slate-700"><th class="p-3 font-bold border-r w-4/5">Comportamental</th><th class="p-3 font-bold text-center border-r w-24">Sim</th><th class="p-3 font-bold text-center w-24">Não</th></tr></thead><tbody id="avCorpoComportamental" class="divide-y divide-slate-200"></tbody></table></div></div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2 border-t">
+          <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nota Final (Automático) *</label><input type="text" id="avNotaNum" readonly required placeholder="Ex: 10.0" class="w-full h-11 px-3 border border-slate-200 bg-slate-50 rounded-xl text-lg font-black text-orange-600 text-center outline-none cursor-not-allowed"><span class="text-[10px] text-slate-400 mt-1 block">A nota é calculada automaticamente a partir dos itens do Conteúdo Pedagógico.</span></div>
+          <div class="md:col-span-2 space-y-2"><div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Feedback Geral do Instrutor *</label><textarea id="avFeedbackTexto" required rows="2" class="w-full p-3 border border-slate-300 rounded-xl text-xs font-semibold outline-none" placeholder="Digite obrigatoriamente as observações do aluno na aula..."></textarea></div><div class="pt-1"><button type="button" onclick="abrirModalIncorporarEvidencia()" class="px-4 py-2 border border-slate-300 hover:border-orange-500 rounded-xl text-xs font-bold text-slate-700 bg-slate-50 hover:bg-white flex items-center gap-2 shadow-sm transition"><i data-lucide="paperclip" class="w-4 h-4 text-orange-600"></i><span id="btnTxtAnexarEvidencia">Anexar Evidências</span></button></div></div>
+        </div>
+        <div class="flex justify-end gap-3 pt-4 border-t"><button type="button" onclick="fecharModalAvaliar()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-xl">Cancelar</button><button type="submit" id="btnSalvarAvaliacao" class="px-6 py-2.5 text-white text-xs font-bold rounded-xl shadow-lg" style="background-color: var(--btn-color);">Concluir e Registrar Aula</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: INCORPORAR EVIDÊNCIAS -->
+  <div id="modalIncorporarEvidencia" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-200 p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6 relative transform scale-95 transition-transform duration-200 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b pb-3"><div class="flex items-center gap-2"><i data-lucide="link" class="w-5 h-5 text-orange-600"></i><h3 class="text-sm font-extrabold uppercase tracking-wide text-slate-800">Incorporar Link de Evidências</h3></div><button type="button" onclick="fecharModalIncorporarEvidencia()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+      <div class="space-y-3 text-xs">
+        <div><label class="block font-bold text-slate-700 uppercase mb-1">COLE A URL DA EVIDÊNCIA (GOOGLE DRIVE, FOTO, VÍDEO, WEB)</label><input type="url" id="inputUrlEvidencia" value="" placeholder="https://..." class="w-full h-11 px-3 border border-slate-300 rounded-xl font-semibold outline-none focus:border-orange-500"></div>
+        <div id="boxFrameEvidencia" class="w-full aspect-video rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center relative"><iframe id="frameEvidenciaPreview" class="w-full h-full" src="https://previatreinamentos.github.io/grava-o/" frameborder="0" allowfullscreen allow="camera; microphone; display-capture"></iframe></div>
+      </div>
+      <div class="flex justify-end gap-3 pt-2 border-t"><button type="button" onclick="fecharModalIncorporarEvidencia()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-xl">Cancelar</button><button type="button" onclick="confirmarLinkEvidencia()" class="px-6 py-2.5 text-white font-bold text-xs rounded-xl shadow-lg" style="background-color: var(--btn-color);">Confirmar e Anexar</button></div>
+    </div>
+  </div>
+
+  <!-- ==================== [LOGICA GERAL + INTEGRAÇÃO FIREBASE] ==================== -->
   <script>
-    // URL da API do Google Apps Script
-    // Cole aqui a URL gerada na implantação ou configure direto na planilha
-    const WEBAPP_URL = "https://script.google.com/macros/s/SEU_DEPLOY_ID/exec";
-
     let perfilAtual = 'aluno';
+    let usuarioLogado = null;
+    let ehAdminMaster = false;
+    let abaAtivaAtual = 'relatorio';
+    let todasAulasInstrutor = [];
+    let diasComAulasInstrutor = [];
+    
+    let todasVagasAluno = [];
+    let diasLivresAluno = [];
+    let minhasAulasAluno = [];
+    let diasMinhasAulasAluno = [];
+    let vagaSelecionadaAluno = null;
+    let linkEvidenciaAnexada = '';
+    
+    let todosMateriaisInstrutor = [];
+    let todosAlunosCadastrados = [];
+    let todosInstrutoresCadastrados = [];
+    let materialSelecionadoParaMatricula = null;
+    let mapaSelecaoTemporariaMatriculas = {};
+    let mapaSelecaoTemporariaInstrutores = {};
 
-    function mudarPerfil(perfil) {
+    let deferredPromptApp = null;
+
+    const ITENS_COMPORTAMENTAIS_PADRAO = ["Ansioso", "Atento", "Seguro", "Condução defensiva", "Segue as orientações do instrutor"];
+
+    function trocarPerfilLogin(perfil) {
       perfilAtual = perfil;
-      const isAluno = perfil === 'aluno';
+      const btnAluno = document.getElementById('btnTabAluno');
+      const btnInst = document.getElementById('btnTabInstrutor');
+      const lblDoc = document.getElementById('lblDoc');
+      const txtDica = document.getElementById('txtDica');
+      const inputDoc = document.getElementById('inputDoc');
 
-      document.getElementById('btnAluno').classList.toggle('active', isAluno);
-      document.getElementById('btnInstrutor').classList.toggle('active', !isAluno);
-
-      document.getElementById('labelTelefone').innerText = isAluno ? 'Telefone do Aluno' : 'Telefone do Instrutor';
-      document.getElementById('labelDicaSenha').innerText = isAluno 
-        ? 'Dica: Por padrão, a sua senha são os 4 primeiros dígitos do celular (sem DDD).' 
-        : 'Dica: Digite sua senha cadastrada de instrutor.';
-    }
-
-    function aplicarMascaraTelefone(el) {
-      let v = el.value.replace(/\D/g, '');
-      if (v.length > 11) v = v.substring(0, 11);
-      if (v.length > 10) {
-        v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
-      } else if (v.length > 5) {
-        v = v.replace(/^(\d{2})(\d{4})(\d{0,4})$/, '($1) $2-$3');
-      } else if (v.length > 2) {
-        v = v.replace(/^(\d{2})(\d{0,5})$/, '($1) $2');
+      if (perfil === 'aluno') {
+        btnAluno.style.setProperty('background-color', 'var(--btn-color)', 'important');
+        btnAluno.className = 'tab-login-btn flex-1 py-3 rounded-xl text-xs font-black text-white shadow-lg transition select-none cursor-pointer';
+        btnInst.style.setProperty('background-color', 'transparent', 'important');
+        btnInst.className = 'tab-login-btn flex-1 py-3 rounded-xl text-xs font-black text-teal-300 hover:text-white transition select-none bg-transparent cursor-pointer';
+        
+        lblDoc.innerText = 'CPF ou Celular do Usuário';
+        txtDica.innerText = 'Dica: Por padrão, a sua senha são os 4 primeiros dígitos do CPF ou Celular.';
+        inputDoc.placeholder = '000.000.000-00 ou Celular';
+      } else {
+        btnInst.style.setProperty('background-color', 'var(--btn-color)', 'important');
+        btnInst.className = 'tab-login-btn flex-1 py-3 rounded-xl text-xs font-black text-white shadow-lg transition select-none cursor-pointer';
+        btnAluno.style.setProperty('background-color', 'transparent', 'important');
+        btnAluno.className = 'tab-login-btn flex-1 py-3 rounded-xl text-xs font-black text-teal-300 hover:text-white transition select-none bg-transparent cursor-pointer';
+        
+        lblDoc.innerText = 'CPF ou Celular do Instrutor';
+        txtDica.innerText = 'Dica: Digite sua senha cadastrada no banco.';
+        inputDoc.placeholder = 'Digite seu CPF ou Celular';
       }
-      el.value = v;
     }
 
     async function realizarLogin(e) {
       e.preventDefault();
-      const telefone = document.getElementById('campoTelefone').value;
-      const senha = document.getElementById('campoSenha').value;
-      const btn = document.getElementById('btnSubmit');
-      const btnTexto = document.getElementById('btnSubmitTexto');
+      const doc = document.getElementById('inputDoc').value.trim();
+      const senha = document.getElementById('inputSenha').value.trim();
+      const btn = document.getElementById('btnEntrar');
+      btn.innerText = 'Entrando...';
+      btn.disabled = true;
 
-      if (!WEBAPP_URL || WEBAPP_URL.includes("SEU_DEPLOY_ID")) {
-        alert("Por favor, configure a URL_WEBAPP do Apps Script na constante WEBAPP_URL.");
+      try {
+        let query = await db.collection("usuarios")
+          .where("cpf", "==", doc)
+          .where("tipo", "==", perfilAtual)
+          .get();
+
+        if (query.empty && perfilAtual === 'instrutor') {
+          query = await db.collection("usuarios")
+            .where("cpf", "==", doc)
+            .where("tipo", "==", "admin")
+            .get();
+        }
+
+        if (query.empty) {
+          alert('Usuário não localizado. Verifique se digitou o CPF ou Celular correto e selecionou a aba correta.');
+          return;
+        }
+
+        const dados = query.docs[0].data();
+        dados.id = query.docs[0].id;
+        
+        const senhaEsperada = dados.senha || doc.replace(/\D/g, '').substring(0, 4);
+        if (senha !== senhaEsperada) {
+          alert('Senha de acesso incorreta.');
+          return;
+        }
+
+        usuarioLogado = dados;
+        ehAdminMaster = (usuarioLogado.adminMaster === true || usuarioLogado.adminMaster === 'true' || usuarioLogado.tipo === 'admin' || usuarioLogado.funcao === 'master');
+
+        document.getElementById('telaLogin').classList.add('hidden');
+        document.getElementById('telaDashboard').classList.remove('hidden');
+
+        const primeiroNome = usuarioLogado.nome.trim().split(' ')[0];
+        document.getElementById('sideNomeUsuario').innerText = usuarioLogado.nome;
+        document.getElementById('badgeIniciais').innerText = usuarioLogado.nome.substring(0, 2).toUpperCase();
+
+        if (perfilAtual === 'aluno') {
+          document.getElementById('menuNavAluno').classList.remove('hidden');
+          document.getElementById('menuNavInstrutor').classList.add('hidden');
+          document.getElementById('sideStatusUsuario').innerText = '● Aluno Ativo';
+          document.getElementById('boxBoasVindas').innerText = 'Olá, ' + primeiroNome + '!';
+          document.getElementById('boxTelefone').innerText = usuarioLogado.telefone || '--';
+          document.getElementById('boxEmail').innerText = usuarioLogado.email || '--';
+          document.getElementById('boxEndereco').innerText = usuarioLogado.endereco || '--';
+          document.getElementById('topoNomeInstrutor').innerText = usuarioLogado.instrutor || 'Amauri de Souza';
+          document.getElementById('topoVeiculoInstrutor').innerText = 'Veículo: ' + (usuarioLogado.veiculo || 'Ford Ka');
+          document.getElementById('cardInstrutorNome').innerText = usuarioLogado.instrutor || 'Amauri de Souza';
+          document.getElementById('cardInstrutorCarro').innerText = 'Veículo cadastrado: ' + (usuarioLogado.veiculo || 'Ford Ka');
+          navegarParaAba('relatorio');
+        } else {
+          document.getElementById('menuNavAluno').classList.add('hidden');
+          document.getElementById('menuNavInstrutor').classList.remove('hidden');
+          document.getElementById('sideStatusUsuario').innerText = ehAdminMaster ? '● Admin Master' : '● Instrutor';
+          document.getElementById('topoNomeInstrutor').innerText = usuarioLogado.nome;
+          document.getElementById('topoVeiculoInstrutor').innerText = 'Veículo: ' + (usuarioLogado.veiculo || 'Ford Ka');
+          document.getElementById('cadInstrutor').value = usuarioLogado.nome;
+
+          const btnCadastrarCurso = document.getElementById('btnNovoCursoMaterial');
+          if (ehAdminMaster) {
+            if (btnCadastrarCurso) btnCadastrarCurso.classList.remove('hidden');
+          } else {
+            if (btnCadastrarCurso) btnCadastrarCurso.classList.add('hidden');
+          }
+
+          navegarParaAba('agenda_inst');
+        }
+      } catch (err) {
+        alert('Erro ao conectar ao Firebase: ' + err.message);
+      } finally {
+        btn.innerText = 'Acessar o Painel';
+        btn.disabled = false;
+        lucide.createIcons();
+      }
+    }
+
+    function navegarParaAba(nomeAba) {
+      abaAtivaAtual = nomeAba;
+      const abas = ['relatorio', 'agendar', 'historico', 'ead', 'agenda_inst', 'cadastro_aluno', 'ferramentas'];
+      const titulos = {
+        'relatorio': 'RELATÓRIO GERAL', 
+        'agendar': 'AGENDAR AULA PRÁTICA', 
+        'historico': 'HISTÓRICO & NOTAS',
+        'ead': 'CURSOS & AULAS EAD', 
+        'agenda_inst': 'MINHA AGENDA PRÁTICA', 
+        'cadastro_aluno': 'CADASTRAR NOVO ALUNO',
+        'ferramentas': 'FERRAMENTAS & CURSOS'
+      };
+
+      abas.forEach(aba => {
+        const sec = document.getElementById('aba_' + aba);
+        if (sec) sec.classList.toggle('hidden', aba !== nomeAba);
+      });
+
+      const elTitulo = document.getElementById('topoTituloSecao');
+      if (elTitulo) elTitulo.innerText = titulos[nomeAba] || 'PORTAL';
+
+      const botoes = document.querySelectorAll('.menu-btn');
+      botoes.forEach(btn => {
+        btn.style.backgroundColor = 'transparent';
+        btn.classList.remove('text-white');
+        btn.classList.add('text-slate-300');
+      });
+
+      const btnAtivo = document.getElementById('btnNav_' + nomeAba);
+      if (btnAtivo) {
+        btnAtivo.style.backgroundColor = 'var(--btn-color)';
+        btnAtivo.classList.remove('text-slate-300');
+        btnAtivo.classList.add('text-white');
+      }
+
+      if (nomeAba === 'agenda_inst') carregarAgendaInstrutor();
+      if (nomeAba === 'agendar') carregarVagasAluno();
+      if (nomeAba === 'historico') carregarHistoricoAluno();
+      if (nomeAba === 'ead') carregarCursosEAD();
+      if (nomeAba === 'ferramentas') carregarMateriaisEducacionaisInstrutor();
+
+      lucide.createIcons();
+    }
+
+    function atualizarDadosGerais() {
+      if (abaAtivaAtual === 'agenda_inst') carregarAgendaInstrutor(true);
+      else if (abaAtivaAtual === 'agendar') carregarVagasAluno(true);
+      else if (abaAtivaAtual === 'historico') carregarHistoricoAluno();
+      else if (abaAtivaAtual === 'ead') carregarCursosEAD();
+      else if (abaAtivaAtual === 'ferramentas') carregarMateriaisEducacionaisInstrutor();
+      else alert('Dados atualizados com sucesso!');
+    }
+
+    function alternarRecolherSidebar() { document.getElementById('sidebarMenu').classList.toggle('collapsed'); }
+
+    async function carregarAgendaInstrutor(limparFiltro = false) {
+      const corpo = document.getElementById('tabelaAgendaInstrutorCorpo');
+      corpo.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400">Carregando dados em tempo real...</td></tr>';
+      try {
+        const snapshot = await db.collection("historico_aulas")
+          .where("instrutor", "==", usuarioLogado.nome)
+          .get();
+
+        todasAulasInstrutor = [];
+        const diasSet = new Set();
+
+        snapshot.forEach(doc => {
+          const aula = doc.data();
+          aula.id = doc.id;
+          aula.linha = doc.id;
+          aula.ehConcluida = (aula.status === 'concluida' || aula.status === 'Concluída');
+          todasAulasInstrutor.push(aula);
+          if (aula.data) diasSet.add(aula.data);
+        });
+
+        diasComAulasInstrutor = Array.from(diasSet);
+        atualizarCardsMetricasInstrutor(todasAulasInstrutor);
+        renderizarCalendarioInstrutor();
+        renderizarTabelaAgendaInstrutor(todasAulasInstrutor);
+
+        if (limparFiltro) {
+          document.getElementById('tituloAgendaInstrutor').innerText = 'AULAS AGENDADAS';
+          document.querySelectorAll('#calDiasInstrutorGrid .cal-day-cell').forEach(c => c.classList.remove('selecionado'));
+        }
+      } catch (e) {
+        corpo.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-rose-500">Erro ao carregar dados da agenda.</td></tr>';
+      }
+    }
+
+    function atualizarCardsMetricasInstrutor(aulas) {
+      const alunosSet = new Set();
+      let concluidas = 0, agendadas = 0;
+      aulas.forEach(a => {
+        if (a.alunoNome) alunosSet.add(a.alunoNome.trim().toLowerCase());
+        if (a.ehConcluida) concluidas++;
+        else agendadas++;
+      });
+      document.getElementById('dashInstTotalAlunos').innerText = alunosSet.size;
+      document.getElementById('dashInstAulasConcluidas').innerText = concluidas;
+      document.getElementById('dashInstAulasAgendadas').innerText = agendadas;
+    }
+
+    function renderizarCalendarioInstrutor() {
+      const agora = new Date();
+      const ano = agora.getFullYear(), mes = agora.getMonth();
+      const mesesNomes = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+      document.getElementById('calMesAnoInstrutor').innerText = mesesNomes[mes] + ' de ' + ano;
+      const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
+      const totalDiasMes = new Date(ano, mes + 1, 0).getDate();
+      const grid = document.getElementById('calDiasInstrutorGrid');
+      grid.innerHTML = '';
+
+      for (let i = 0; i < primeiroDiaSemana; i++) {
+        const v = document.createElement('div');
+        v.className = 'cal-day-cell vazio';
+        grid.appendChild(v);
+      }
+      for (let dia = 1; dia <= totalDiasMes; dia++) {
+        const dStr = String(dia).padStart(2, '0') + '/' + String(mes + 1).padStart(2, '0') + '/' + ano;
+        const temAula = diasComAulasInstrutor.includes(dStr);
+        const cell = document.createElement('div');
+        cell.className = 'cal-day-cell ' + (temAula ? 'ocupado' : 'livre');
+        cell.innerText = dia;
+        cell.onclick = () => {
+          document.querySelectorAll('#calDiasInstrutorGrid .cal-day-cell').forEach(c => c.classList.remove('selecionado'));
+          cell.classList.add('selecionado');
+          document.getElementById('tituloAgendaInstrutor').innerText = 'AULAS EM ' + dStr;
+          renderizarTabelaAgendaInstrutor(todasAulasInstrutor.filter(a => a.data === dStr));
+        };
+        grid.appendChild(cell);
+      }
+    }
+
+    function renderizarTabelaAgendaInstrutor(lista) {
+      const corpo = document.getElementById('tabelaAgendaInstrutorCorpo');
+      corpo.innerHTML = '';
+      if (lista.length === 0) { corpo.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhuma aula agendada para esta data.</td></tr>'; return; }
+      lista.forEach(a => {
+        const tr = document.createElement('tr');
+        const badgeCor = a.ehConcluida ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-orange-50 text-orange-600 border-orange-200 font-black';
+        const acaoBtn = a.ehConcluida 
+          ? `<button type="button" onclick="visualizarFichaAula('${encodeURIComponent(JSON.stringify(a))}')" class="px-3 py-1 bg-white hover:bg-slate-50 border border-slate-200 text-teal-700 rounded-lg font-bold text-xs flex items-center gap-1.5"><i data-lucide="eye" class="w-3.5 h-3.5"></i> Ver Ficha</button>`
+          : `<button type="button" onclick="abrirModalAvaliarAula('${encodeURIComponent(JSON.stringify(a))}')" class="px-3.5 py-1.5 text-white font-black text-xs rounded-xl shadow-md transition" style="background-color: var(--btn-color);">Iniciar Avaliação</button>`;
+        tr.innerHTML = `<td class="p-3 font-bold text-slate-900">${a.alunoNome}</td><td class="p-3 font-semibold text-slate-800">${a.titulo}</td><td class="p-3 font-semibold text-slate-600">${a.data} • ${a.inicio} às ${a.fim}</td><td class="p-3"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold border ${badgeCor}">${a.status}</span></td><td class="p-3 flex items-center gap-2">${acaoBtn}<button type="button" onclick="compartilharWhatsApp('${encodeURIComponent(JSON.stringify(a))}')" class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition border border-emerald-200" title="Compartilhar no WhatsApp"><i data-lucide="share-2" class="w-3.5 h-3.5"></i></button></td>`;
+        corpo.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    function abrirModalLiberarHorario() {
+      const hojeISO = new Date().toISOString().split('T')[0];
+      document.getElementById('libData').value = hojeISO;
+      document.getElementById('diaTodoData').value = hojeISO;
+      const m = document.getElementById('modalLiberarHorario');
+      m.classList.remove('hidden');
+      setTimeout(() => { m.classList.remove('opacity-0'); m.querySelector('div').classList.remove('scale-95'); }, 10);
+    }
+    function fecharModalLiberarHorario() {
+      const m = document.getElementById('modalLiberarHorario');
+      m.classList.add('opacity-0');
+      m.querySelector('div').classList.add('scale-95');
+      setTimeout(() => m.classList.add('hidden'), 200);
+    }
+
+    function alternarModoLiberacao(modo) {
+      const formInd = document.getElementById('formHorarioIndividual');
+      const formDT = document.getElementById('formHorarioDiaTodo');
+      const tabInd = document.getElementById('tabModoIndividual');
+      const tabDT = document.getElementById('tabModoDiaTodo');
+      if (modo === 'individual') {
+        formInd.classList.remove('hidden'); formDT.classList.add('hidden');
+        tabInd.className = 'tab-login-btn flex-1 py-2 rounded-lg bg-white shadow-sm text-slate-900';
+        tabDT.className = 'tab-login-btn flex-1 py-2 rounded-lg text-slate-500 hover:text-slate-900';
+      } else {
+        formInd.classList.add('hidden'); formDT.classList.remove('hidden');
+        tabDT.className = 'tab-login-btn flex-1 py-2 rounded-lg bg-white shadow-sm text-slate-900';
+        tabInd.className = 'tab-login-btn flex-1 py-2 rounded-lg text-slate-500 hover:text-slate-900';
+      }
+    }
+
+    async function salvarHorarioDisponivel(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSalvarHorario');
+      btn.innerText = 'Salvando...'; btn.disabled = true;
+      try {
+        const [ano, mes, dia] = document.getElementById('libData').value.split('-');
+        const dataFormatada = `${dia}/${mes}/${ano}`;
+
+        await db.collection("aulas_disponiveis").add({
+          instrutor: usuarioLogado.nome,
+          data: dataFormatada,
+          titulo: document.getElementById('libTitulo').value,
+          inicio: document.getElementById('libInicio').value,
+          fim: document.getElementById('libFim').value,
+          local: document.getElementById('libLocal').value,
+          status: 'disponivel',
+          criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert('Horário liberado com sucesso!');
+        fecharModalLiberarHorario();
+        carregarAgendaInstrutor();
+      } catch (err) { alert('Erro ao salvar horário: ' + err.message); } finally { btn.innerText = 'Salvar Horário'; btn.disabled = false; }
+    }
+
+    async function salvarDiaTodoDisponivel(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSalvarDiaTodo');
+      btn.innerText = 'Gerando grade...'; btn.disabled = true;
+      try {
+        const [ano, mes, dia] = document.getElementById('diaTodoData').value.split('-');
+        const dataFormatada = `${dia}/${mes}/${ano}`;
+        const local = document.getElementById('dtLocal').value;
+
+        const gradeHorarios = [
+          { inicio: "08:00", fim: "08:50", titulo: "Baliza / Prática" },
+          { inicio: "09:00", fim: "09:50", titulo: "Trânsito Urbano" },
+          { inicio: "10:00", fim: "10:50", titulo: "Manobras / Marcha a Ré" },
+          { inicio: "11:00", fim: "11:50", titulo: "Prática Geral" },
+          { inicio: "13:30", fim: "14:20", titulo: "Baliza / Prática" },
+          { inicio: "14:30", fim: "15:20", titulo: "Trânsito Rápido" },
+          { inicio: "15:30", fim: "16:20", titulo: "Rotatórias / Cruzamentos" },
+          { inicio: "16:30", fim: "17:20", titulo: "Simulado de Exame" }
+        ];
+
+        const batch = db.batch();
+        gradeHorarios.forEach(slot => {
+          const ref = db.collection("aulas_disponiveis").doc();
+          batch.set(ref, {
+            instrutor: usuarioLogado.nome,
+            data: dataFormatada,
+            titulo: slot.titulo,
+            inicio: slot.inicio,
+            fim: slot.fim,
+            local: local,
+            status: 'disponivel',
+            criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        });
+
+        await batch.commit();
+        alert('Grade do dia todo liberada com sucesso!');
+        fecharModalLiberarHorario();
+        carregarAgendaInstrutor();
+      } catch (err) { alert('Erro ao gerar grade: ' + err.message); } finally { btn.innerText = '⚡ Gerar Grade do Dia Todo'; btn.disabled = false; }
+    }
+
+    async function carregarVagasAluno(limparFiltro = false) {
+      const corpo = document.getElementById('tabelaVagasAlunoCorpo');
+      corpo.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400">Buscando horários disponíveis...</td></tr>';
+      fecharBoxMinhasAulasDia();
+
+      try {
+        const snapMinhasAulas = await db.collection("historico_aulas")
+          .where("cpf", "==", usuarioLogado.cpf)
+          .where("status", "==", "agendada")
+          .get();
+
+        minhasAulasAluno = [];
+        const setMinhasDatas = new Set();
+        snapMinhasAulas.forEach(doc => {
+          const a = doc.data();
+          a.id = doc.id;
+          minhasAulasAluno.push(a);
+          if (a.data) setMinhasDatas.add(a.data);
+        });
+        diasMinhasAulasAluno = Array.from(setMinhasDatas);
+
+        const snapVagas = await db.collection("aulas_disponiveis")
+          .where("status", "==", "disponivel")
+          .get();
+
+        todasVagasAluno = [];
+        const diasSet = new Set();
+
+        snapVagas.forEach(doc => {
+          const v = doc.data();
+          v.id = doc.id;
+          v.linha = doc.id;
+          todasVagasAluno.push(v);
+          if (v.data) diasSet.add(v.data);
+        });
+
+        diasLivresAluno = Array.from(diasSet);
+        renderizarCalendarioAluno();
+        renderizarTabelaVagasAluno(todasVagasAluno);
+
+        if (limparFiltro) {
+          document.getElementById('tituloVagasAluno').innerText = 'HORÁRIOS DISPONÍVEIS';
+          document.querySelectorAll('#calDiasAlunoGrid .cal-day-cell').forEach(c => c.classList.remove('selecionado'));
+        }
+      } catch (e) { corpo.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-rose-500">Erro ao carregar vagas.</td></tr>'; }
+    }
+
+    function renderizarCalendarioAluno() {
+      const agora = new Date(), ano = agora.getFullYear(), mes = agora.getMonth();
+      const mesesNomes = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+      document.getElementById('calMesAnoAluno').innerText = mesesNomes[mes] + ' de ' + ano;
+      const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
+      const totalDiasMes = new Date(ano, mes + 1, 0).getDate();
+      const grid = document.getElementById('calDiasAlunoGrid');
+      grid.innerHTML = '';
+      
+      for (let i = 0; i < primeiroDiaSemana; i++) grid.innerHTML += '<div class="cal-day-cell vazio"></div>';
+      
+      for (let dia = 1; dia <= totalDiasMes; dia++) {
+        const dStr = String(dia).padStart(2, '0') + '/' + String(mes + 1).padStart(2, '0') + '/' + ano;
+        const temMinhaAula = diasMinhasAulasAluno.includes(dStr);
+        const temVagaLivre = diasLivresAluno.includes(dStr);
+
+        let classeCss = 'vazio text-slate-300';
+        if (temMinhaAula) classeCss = 'minha-aula';
+        else if (temVagaLivre) classeCss = 'livre';
+
+        const cell = document.createElement('div');
+        cell.className = 'cal-day-cell ' + classeCss;
+        cell.innerText = dia;
+        
+        if (temMinhaAula || temVagaLivre) {
+          cell.onclick = () => {
+            document.querySelectorAll('#calDiasAlunoGrid .cal-day-cell').forEach(c => c.classList.remove('selecionado'));
+            cell.classList.add('selecionado');
+            
+            const aulasAlunoHoje = minhasAulasAluno.filter(a => a.data === dStr);
+            if (aulasAlunoHoje.length > 0) mostrarBoxMinhasAulasNesteDia(dStr, aulasAlunoHoje);
+            else fecharBoxMinhasAulasDia();
+
+            document.getElementById('tituloVagasAluno').innerText = 'HORÁRIOS DISPONÍVEIS EM ' + dStr;
+            renderizarTabelaVagasAluno(todasVagasAluno.filter(v => v.data === dStr));
+          };
+        }
+        grid.appendChild(cell);
+      }
+    }
+
+    function mostrarBoxMinhasAulasNesteDia(dataStr, lista) {
+      const box = document.getElementById('boxMinhasAulasNesteDia');
+      const titulo = document.getElementById('tituloMinhasAulasDia');
+      const listaDiv = document.getElementById('listaMinhasAulasDia');
+      
+      titulo.innerText = `Sua Aula Agendada no dia ${dataStr}:`;
+      listaDiv.innerHTML = '';
+      
+      lista.forEach(a => {
+        const item = document.createElement('div');
+        item.className = 'flex items-center justify-between bg-white/70 p-2.5 rounded-xl border border-orange-200';
+        item.innerHTML = `
+          <div>
+            <span class="font-extrabold text-orange-950">${a.titulo}</span>
+            <div class="text-[11px] text-orange-800">${a.inicio} às ${a.fim} • Prof. ${a.instrutor} (${a.local})</div>
+          </div>
+          <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-orange-100 text-orange-700 border border-orange-300">Confirmada</span>
+        `;
+        listaDiv.appendChild(item);
+      });
+      box.classList.remove('hidden');
+    }
+
+    function fecharBoxMinhasAulasDia() {
+      const box = document.getElementById('boxMinhasAulasNesteDia');
+      if (box) box.classList.add('hidden');
+    }
+
+    function renderizarTabelaVagasAluno(lista) {
+      const corpo = document.getElementById('tabelaVagasAlunoCorpo');
+      corpo.innerHTML = '';
+      if (lista.length === 0) { corpo.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhum horário disponível para esta data.</td></tr>'; return; }
+      lista.forEach(v => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="p-3 font-bold text-slate-800">${v.data}</td><td class="p-3 font-semibold text-teal-700">${v.inicio} às ${v.fim}</td><td class="p-3 text-slate-600">📍 ${v.local} • Prof. ${v.instrutor}</td><td class="p-3 font-semibold text-slate-800">${v.titulo}</td><td class="p-3"><button type="button" onclick="abrirConfirmacaoAgendamento('${encodeURIComponent(JSON.stringify(v))}')" class="px-4 py-1.5 text-white font-bold text-xs rounded-xl shadow" style="background-color: var(--btn-color);">Agendar</button></td>`;
+        corpo.appendChild(tr);
+      });
+    }
+
+    async function abrirConfirmacaoAgendamento(vagaEncoded) {
+      vagaSelecionadaAluno = JSON.parse(decodeURIComponent(vagaEncoded));
+      document.getElementById('txtResumoVaga').innerHTML = 'Data: <b>' + vagaSelecionadaAluno.data + '</b> (' + vagaSelecionadaAluno.inicio + ' às ' + vagaSelecionadaAluno.fim + ')<br>Local: ' + vagaSelecionadaAluno.local + '<br>Instrutor: <b>' + vagaSelecionadaAluno.instrutor + '</b>';
+      const sel = document.getElementById('selTipoAulaAluno');
+      sel.innerHTML = '<option>Carregando modelos de aula...</option>';
+      const m = document.getElementById('modalConfirmarAgendamento');
+      m.classList.remove('hidden');
+      setTimeout(() => { m.classList.remove('opacity-0'); m.querySelector('div').classList.remove('scale-95'); }, 10);
+      try {
+        const snap = await db.collection("modelos_aula").get();
+        sel.innerHTML = '';
+        if (snap.empty) {
+          sel.innerHTML = '<option value="Baliza / Estacionamento">Baliza / Estacionamento</option><option value="Aula em Trânsito Intenso">Aula em Trânsito Intenso</option><option value="Rotatórias e Conversões">Rotatórias e Conversões</option>';
+        } else {
+          snap.forEach(doc => {
+            const opt = document.createElement('option');
+            opt.value = doc.data().nome || doc.data().titulo;
+            opt.textContent = opt.value;
+            sel.appendChild(opt);
+          });
+        }
+      } catch (e) { sel.innerHTML = '<option value="Baliza">Baliza</option><option value="Trânsito Urbano">Trânsito Urbano</option>'; }
+    }
+
+    function fecharModalConfirmarAgendamento() {
+      const m = document.getElementById('modalConfirmarAgendamento');
+      m.classList.add('opacity-0'); m.querySelector('div').classList.add('scale-95');
+      setTimeout(() => m.classList.add('hidden'), 200);
+    }
+
+    async function confirmarAgendamentoPeloAluno(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnConfirmarVaga');
+      btn.innerText = 'Agendando...'; btn.disabled = true;
+      try {
+        const batch = db.batch();
+        const refVaga = db.collection("aulas_disponiveis").doc(vagaSelecionadaAluno.id);
+        batch.delete(refVaga);
+
+        const refHistorico = db.collection("historico_aulas").doc();
+        batch.set(refHistorico, {
+          alunoNome: usuarioLogado.nome,
+          cpf: usuarioLogado.cpf,
+          telefone: usuarioLogado.telefone || '',
+          instrutor: vagaSelecionadaAluno.instrutor,
+          titulo: document.getElementById('selTipoAulaAluno').value,
+          data: vagaSelecionadaAluno.data,
+          inicio: vagaSelecionadaAluno.inicio,
+          fim: vagaSelecionadaAluno.fim,
+          local: vagaSelecionadaAluno.local,
+          status: 'agendada',
+          nota: '0.0',
+          obs: '',
+          detalhes: '{}',
+          criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        await batch.commit();
+        alert('Aula agendada com sucesso!');
+        fecharModalConfirmarAgendamento();
+        carregarVagasAluno();
+      } catch (err) { alert('Erro ao agendar aula: ' + err.message); } finally { btn.innerText = 'Confirmar e Salvar no Histórico'; btn.disabled = false; }
+    }
+
+    async function carregarHistoricoAluno() {
+      const corpo = document.getElementById('tabelaHistoricoAlunoCorpo');
+      corpo.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">Carregando histórico completo...</td></tr>';
+      try {
+        const snap = await db.collection("historico_aulas")
+          .where("cpf", "==", usuarioLogado.cpf)
+          .get();
+
+        let total = 0, concluidas = 0, somaNotas = 0;
+        corpo.innerHTML = '';
+
+        if (snap.empty) {
+          document.getElementById('metricasTotalAulas').innerText = '0';
+          document.getElementById('metricasConcluidas').innerText = '0';
+          document.getElementById('metricasMediaGeral').innerText = '0.0';
+          corpo.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">Você ainda não realizou agendamentos de aulas.</td></tr>';
+          return;
+        }
+
+        snap.forEach(doc => {
+          total++;
+          const h = doc.data();
+          h.id = doc.id;
+          h.linha = doc.id;
+          h.ehConcluida = (h.status === 'concluida' || h.status === 'Concluída');
+          if (h.ehConcluida) {
+            concluidas++;
+            somaNotas += parseFloat(h.nota || 0);
+          }
+
+          const tr = document.createElement('tr');
+          const statusBadge = h.ehConcluida ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Concluída</span>' : '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-orange-50 text-orange-600 border border-orange-200">Agendada</span>';
+          const acaoBtn = h.ehConcluida ? `<button type="button" onclick="visualizarFichaAula('${encodeURIComponent(JSON.stringify(h))}')" class="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-teal-700 rounded-xl font-bold text-xs flex items-center gap-1.5"><i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> Ver Ficha</button>` : '<span class="text-slate-400 text-xs italic">Aguardando aula</span>';
+          tr.innerHTML = `<td class="p-4 font-bold text-slate-900 text-sm">${h.titulo}</td><td class="p-4 font-semibold text-slate-700">${h.data}<br><span class="text-xs text-slate-400 font-normal">${h.inicio} às ${h.fim}</span></td><td class="p-4"><div class="font-bold text-teal-800 text-xs">Prof. ${h.instrutor}</div><div class="text-xs text-slate-500">${h.local}</div><div class="text-[10px] text-slate-400 font-medium">🚗 ${usuarioLogado.veiculo || 'Ford Ka'}</div></td><td class="p-4 space-y-1"><div>${statusBadge}</div><div class="text-xs font-bold text-slate-700">Nota: ${h.nota} / 10.0</div></td><td class="p-4 flex items-center gap-2">${acaoBtn}<button type="button" onclick="compartilharWhatsApp('${encodeURIComponent(JSON.stringify(h))}')" class="p-2 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition border border-emerald-200" title="Compartilhar no WhatsApp"><i data-lucide="share-2" class="w-4 h-4"></i></button></td>`;
+          corpo.appendChild(tr);
+        });
+
+        document.getElementById('metricasTotalAulas').innerText = total;
+        document.getElementById('metricasConcluidas').innerText = concluidas;
+        document.getElementById('metricasMediaGeral').innerText = concluidas > 0 ? (somaNotas / concluidas).toFixed(1) : '0.0';
+        lucide.createIcons();
+      } catch (e) { corpo.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-rose-500">Erro ao carregar histórico.</td></tr>'; }
+    }
+
+    async function carregarCursosEAD() {
+      const grid = document.getElementById('gridCursosEADCards');
+      grid.innerHTML = '<div class="col-span-full p-8 text-center text-slate-400">Buscando cursos matriculados...</div>';
+      try {
+        const snap = await db.collection("cursos_ead").get();
+        grid.innerHTML = '';
+        
+        let cursosVisiveis = [];
+
+        snap.forEach(doc => {
+          const c = doc.data();
+          c.id = doc.id;
+
+          let estaMatriculado = false;
+          if (!c.destinadoA || c.destinadoA === 'todos' || c.destinadoA === '') {
+            estaMatriculado = true;
+          } else if (Array.isArray(c.destinadoA)) {
+            estaMatriculado = c.destinadoA.includes(usuarioLogado.cpf) || c.destinadoA.includes(usuarioLogado.telefone);
+          } else if (typeof c.destinadoA === 'string') {
+            estaMatriculado = (c.destinadoA === usuarioLogado.cpf || c.destinadoA === usuarioLogado.telefone);
+          }
+
+          if (estaMatriculado) cursosVisiveis.push(c);
+        });
+
+        if (cursosVisiveis.length === 0) {
+          grid.innerHTML = '<div class="col-span-full p-8 text-center text-slate-400">Você não possui cursos teóricos matriculados no momento.</div>';
+          return;
+        }
+
+        cursosVisiveis.forEach(c => {
+          const card = document.createElement('div');
+          card.className = 'bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between';
+          card.innerHTML = `<div><div class="h-44 w-full bg-slate-100 overflow-hidden relative"><img src="${c.capa}" class="w-full h-full object-cover transition-transform hover:scale-105" onerror="this.src='https://images.unsplash.com/photo-1516321497487-e288fb19713f?w=600&auto=format&fit=crop&q=80'"><span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-white/95 text-teal-800 shadow-sm">${c.categoria || 'Teórico'}</span></div><div class="p-5"><h4 class="font-extrabold text-slate-900 text-sm line-clamp-1">${c.titulo}</h4><p class="text-xs text-slate-500 mt-1 line-clamp-2">${c.descricao}</p></div></div><div class="p-5 pt-0"><button type="button" onclick="abrirPlayerCursoEAD('${encodeURIComponent(JSON.stringify(c))}')" class="w-full py-2.5 rounded-xl text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2" style="background-color: var(--btn-color);"><i data-lucide="play" class="w-4 h-4"></i><span>Acessar Curso</span></button></div>`;
+          grid.appendChild(card);
+        });
+        lucide.createIcons();
+      } catch (err) { grid.innerHTML = '<div class="col-span-full p-8 text-center text-rose-500">Erro ao carregar cursos EAD.</div>'; }
+    }
+
+    function abrirPlayerCursoEAD(cEnc) {
+      const c = JSON.parse(decodeURIComponent(cEnc));
+      document.getElementById('tituloPlayerCurso').innerText = c.titulo;
+      document.getElementById('iframeCursoEAD').src = c.url;
+      document.getElementById('boxPlayerCursoEAD').classList.remove('hidden');
+      document.getElementById('gridCursosEADCards').classList.add('hidden');
+    }
+    function fecharPlayerCursoEAD() {
+      document.getElementById('iframeCursoEAD').src = '';
+      document.getElementById('boxPlayerCursoEAD').classList.add('hidden');
+      document.getElementById('gridCursosEADCards').classList.remove('hidden');
+    }
+
+    async function visualizarFichaAula(aulaEncoded) {
+      const h = JSON.parse(decodeURIComponent(aulaEncoded));
+      document.getElementById('fichaSubtitulo').innerText = `Aula: ${h.titulo} • Data: ${h.data}`;
+      document.getElementById('fichaNotaFinal').innerText = `${h.nota} / 10.0`;
+      document.getElementById('fichaFeedbackInstrutor').innerText = h.obs || 'O aluno executou os percursos respeitando os critérios pedagógicos.';
+      let detalhes = {};
+      try { detalhes = JSON.parse(h.detalhes || '{}'); } catch(e) {}
+      const btnEv = document.getElementById('btnVerEvidenciaNaAvaliacao');
+      if (detalhes.evidenciaLink) { btnEv.classList.remove('hidden'); btnEv.onclick = () => window.open(detalhes.evidenciaLink, '_blank'); } else { btnEv.classList.add('hidden'); }
+      const corpoPed = document.getElementById('fichaCorpoPedagogico');
+      const corpoComp = document.getElementById('fichaCorpoComportamental');
+      corpoPed.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400">Carregando critérios pedagógicos...</td></tr>';
+      corpoComp.innerHTML = '';
+      const m = document.getElementById('modalFichaAvaliacao');
+      m.classList.remove('hidden');
+      setTimeout(() => { m.classList.remove('opacity-0'); m.querySelector('div').classList.remove('scale-95'); }, 10);
+      document.getElementById('btnCompartilharFichaPdf').onclick = () => exportarFichaParaPdf(h, detalhes);
+
+      try {
+        const snap = await db.collection("questoes_aula").where("modelo", "==", h.titulo).get();
+        corpoPed.innerHTML = '';
+        if (snap.empty) {
+          corpoPed.innerHTML = `<tr><td class="p-3 font-semibold text-slate-700 border-r">Critério Geral</td><td class="p-3 text-slate-800 border-r">Controle de embreagem, uso dos espelhos e conversões</td><td class="p-3 text-center border-r text-sm"></td><td class="p-3 text-center border-r text-sm"></td><td class="p-3 text-center border-r text-sm"></td><td class="p-3 text-center text-sm">⭐</td></tr>`;
+        } else {
+          snap.forEach(doc => {
+            const q = doc.data();
+            const valor = String(detalhes['ped_' + q.colLetter] || detalhes[q.colLetter] || 'muitobom').toLowerCase();
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td class="p-3 font-semibold text-slate-700 border-r border-slate-100">Critério</td><td class="p-3 text-slate-800 border-r border-slate-100">${q.descricao}</td><td class="p-3 text-center border-r border-slate-100 text-sm">${valor === 'insuficiente' ? '❌' : ''}</td><td class="p-3 text-center border-r border-slate-100 text-sm">${valor === 'regular' ? '⚠️' : ''}</td><td class="p-3 text-center border-r border-slate-100 text-sm">${valor === 'bom' ? '✔️' : ''}</td><td class="p-3 text-center text-sm">${valor === 'muitobom' ? '⭐' : ''}</td>`;
+            corpoPed.appendChild(tr);
+          });
+        }
+        ITENS_COMPORTAMENTAIS_PADRAO.forEach((comp, idx) => {
+          const valComp = String(detalhes['comp_' + idx] || 'sim').toLowerCase();
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td class="p-3 font-medium text-slate-700 border-r border-slate-100">${comp}</td><td class="p-3 text-center border-r border-slate-100 text-sm">${valComp === 'sim' ? '✔️' : ''}</td><td class="p-3 text-center text-sm">${valComp === 'nao' ? '❌' : ''}</td>`;
+          corpoComp.appendChild(tr);
+        });
+      } catch (e) { corpoPed.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400">Critérios pedagógicos carregados.</td></tr>'; }
+    }
+
+    function fecharModalFicha() {
+      const m = document.getElementById('modalFichaAvaliacao');
+      m.classList.add('opacity-0'); m.querySelector('div').classList.add('scale-95');
+      setTimeout(() => m.classList.add('hidden'), 200);
+    }
+
+    async function abrirModalAvaliarAula(aulaEncoded) {
+      const a = JSON.parse(decodeURIComponent(aulaEncoded));
+      document.getElementById('avLinhaId').value = a.linha || a.id;
+      document.getElementById('avSubtitulo').innerText = `Aluno: ${a.alunoNome} • Modelo: ${a.titulo}`;
+      document.getElementById('avNotaNum').value = '';
+      document.getElementById('avFeedbackTexto').value = '';
+      linkEvidenciaAnexada = '';
+      document.getElementById('inputUrlEvidencia').value = '';
+      document.getElementById('btnTxtAnexarEvidencia').innerText = 'Anexar Evidências';
+      const corpoPed = document.getElementById('avCorpoPedagogico');
+      const corpoComp = document.getElementById('avCorpoComportamental');
+      corpoPed.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400">Carregando critérios pedagógicos...</td></tr>';
+      corpoComp.innerHTML = '';
+      const m = document.getElementById('modalAvaliarAula');
+      m.classList.remove('hidden');
+      setTimeout(() => { m.classList.remove('opacity-0'); m.querySelector('div').classList.remove('scale-95'); }, 10);
+
+      try {
+        const snap = await db.collection("questoes_aula").where("modelo", "==", a.titulo).get();
+        corpoPed.innerHTML = '';
+        let questoes = [];
+        if (snap.empty) {
+          questoes = [
+            { colLetter: "q1", descricao: "Uso correto dos pedais e controle de embreagem" },
+            { colLetter: "q2", descricao: "Atenção à sinalização, paradas e cruzamentos" },
+            { colLetter: "q3", descricao: "Alinhamento do veículo, baliza e uso dos retrovisores" }
+          ];
+        } else {
+          snap.forEach(doc => questoes.push(doc.data()));
+        }
+
+        questoes.forEach(q => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td class="p-3 font-semibold text-slate-700 border-r border-slate-200">Critério</td><td class="p-3 text-slate-800 border-r border-slate-200">${q.descricao}</td><td class="p-3 text-center border-r border-slate-200"><input type="radio" name="ped_${q.colLetter}" value="insuficiente" onchange="calcularNotaPedagogicaExata()" required class="w-4 h-4 text-orange-600 cursor-pointer"></td><td class="p-3 text-center border-r border-slate-200"><input type="radio" name="ped_${q.colLetter}" value="regular" onchange="calcularNotaPedagogicaExata()" required class="w-4 h-4 text-orange-600 cursor-pointer"></td><td class="p-3 text-center border-r border-slate-200"><input type="radio" name="ped_${q.colLetter}" value="bom" onchange="calcularNotaPedagogicaExata()" required class="w-4 h-4 text-orange-600 cursor-pointer"></td><td class="p-3 text-center"><input type="radio" name="ped_${q.colLetter}" value="muitobom" onchange="calcularNotaPedagogicaExata()" required class="w-4 h-4 text-orange-600 cursor-pointer"></td>`;
+          corpoPed.appendChild(tr);
+        });
+
+        ITENS_COMPORTAMENTAIS_PADRAO.forEach((comp, idx) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td class="p-3 font-medium text-slate-700 border-r border-slate-200">${comp}</td><td class="p-3 text-center border-r border-slate-200"><input type="radio" name="comp_${idx}" value="sim" required class="w-4 h-4 text-orange-600 cursor-pointer"></td><td class="p-3 text-center"><input type="radio" name="comp_${idx}" value="nao" required class="w-4 h-4 text-orange-600 cursor-pointer"></td>`;
+          corpoComp.appendChild(tr);
+        });
+      } catch (e) { corpoPed.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400">Falha ao buscar critérios.</td></tr>'; }
+    }
+
+    function calcularNotaPedagogicaExata() {
+      const inputs = document.querySelectorAll('#avCorpoPedagogico input[type="radio"]:checked');
+      if (inputs.length === 0) return;
+      let soma = 0;
+      inputs.forEach(inp => {
+        if (inp.value === 'muitobom') soma += 10.0;
+        else if (inp.value === 'bom') soma += 7.5;
+        else if (inp.value === 'regular') soma += 5.0;
+        else if (inp.value === 'insuficiente') soma += 2.5;
+      });
+      document.getElementById('avNotaNum').value = (soma / inputs.length).toFixed(1);
+    }
+
+    function fecharModalAvaliar() {
+      const m = document.getElementById('modalAvaliarAula');
+      m.classList.add('opacity-0'); m.querySelector('div').classList.add('scale-95');
+      setTimeout(() => m.classList.add('hidden'), 200);
+    }
+
+    function abrirModalIncorporarEvidencia() {
+      document.getElementById('inputUrlEvidencia').value = linkEvidenciaAnexada || '';
+      const m = document.getElementById('modalIncorporarEvidencia');
+      m.classList.remove('hidden');
+      setTimeout(() => { m.classList.remove('opacity-0'); m.querySelector('div').classList.remove('scale-95'); }, 10);
+    }
+    function fecharModalIncorporarEvidencia() {
+      const m = document.getElementById('modalIncorporarEvidencia');
+      m.classList.add('opacity-0'); m.querySelector('div').classList.add('scale-95');
+      setTimeout(() => m.classList.add('hidden'), 200);
+    }
+    function confirmarLinkEvidencia() {
+      const url = document.getElementById('inputUrlEvidencia').value.trim();
+      if (!url) { alert('Cole a URL da evidência gerada antes de confirmar.'); return; }
+      linkEvidenciaAnexada = url;
+      document.getElementById('btnTxtAnexarEvidencia').innerText = '✅ Evidência Anexada';
+      fecharModalIncorporarEvidencia();
+    }
+
+    async function enviarAvaliacaoPratica(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSalvarAvaliacao');
+      btn.innerText = 'Salvando avaliação...'; btn.disabled = true;
+      const detalhes = { evidenciaLink: linkEvidenciaAnexada };
+      document.querySelectorAll('#modalAvaliarAula input[type="radio"]:checked').forEach(r => detalhes[r.name] = r.value);
+
+      try {
+        const idAula = document.getElementById('avLinhaId').value;
+        await db.collection("historico_aulas").doc(idAula).update({
+          status: 'concluida',
+          nota: document.getElementById('avNotaNum').value,
+          obs: document.getElementById('avFeedbackTexto').value,
+          detalhes: JSON.stringify(detalhes),
+          atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert('Avaliação registrada com sucesso!');
+        fecharModalAvaliar();
+        carregarAgendaInstrutor();
+      } catch (err) { alert('Erro ao gravar avaliação: ' + err.message); } finally { btn.innerText = 'Concluir e Registrar Aula'; btn.disabled = false; }
+    }
+
+    function compartilharWhatsApp(aulaEncoded) {
+      const a = JSON.parse(decodeURIComponent(aulaEncoded));
+      let evTxt = '';
+      try { const d = JSON.parse(a.detalhes || '{}'); if (d.evidenciaLink) evTxt = '\n📷 Evidência: ' + d.evidenciaLink; } catch(e) {}
+      const msg = `*Instrutor Amauri de Souza*\n\n🚗 Aula: *${a.titulo}*\n📅 Data: *${a.data} (${a.inicio} às ${a.fim})*\n⭐ Nota: *${a.nota || '10.0'} / 10.0*\n👨‍🏫 Instrutor: *${a.instrutor || usuarioLogado.nome}*\n📝 Parecer: "${a.obs || 'Excelente aproveitamento técnico.'}"` + evTxt;
+      const tel = a.telefone ? '55' + a.telefone.replace(/\D/g, '') : '';
+      window.open(`https://api.whatsapp.com/send?phone=${tel}&text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    function exportarFichaParaPdf(aula, detalhes) {
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+        
+        doc.setFillColor(4, 46, 42); 
+        doc.rect(0, 0, 595, 60, 'F');
+        doc.setTextColor(255, 255, 255); 
+        doc.setFontSize(16); 
+        doc.text("FICHA DE AVALIAÇÃO PRÁTICA - PREVIA", 40, 38);
+        
+        doc.setTextColor(30, 41, 59); 
+        doc.setFontSize(11);
+        doc.text(`Aluno: ${aula.alunoNome || usuarioLogado.nome}`, 40, 90);
+        doc.text(`Aula: ${aula.titulo}`, 40, 108);
+        doc.text(`Data: ${aula.data} (${aula.inicio} às ${aula.fim})`, 40, 126);
+        doc.text(`Instrutor: ${aula.instrutor || 'Amauri de Souza'}`, 40, 144);
+        
+        doc.setFillColor(240, 90, 36); 
+        doc.roundedRect(420, 80, 135, 65, 8, 8, 'F');
+        doc.setTextColor(255, 255, 255); 
+        doc.setFontSize(10); 
+        doc.text("NOTA DA AULA", 445, 102); 
+        doc.setFontSize(22); 
+        doc.text(`${aula.nota} / 10.0`, 435, 132);
+        
+        doc.setTextColor(15, 23, 42); 
+        doc.setFontSize(12); 
+        doc.text("PARECER PEDAGÓGICO DO INSTRUTOR:", 40, 185);
+        doc.setFontSize(10); 
+        doc.setTextColor(71, 85, 105);
+        const splitObs = doc.splitTextToSize(aula.obs || 'O aluno demonstrou excelente aproveitamento técnico nos percursos práticos.', 515);
+        doc.text(splitObs, 40, 205);
+        if (detalhes.evidenciaLink) { 
+          doc.setTextColor(240, 90, 36); 
+          doc.text(`Link de Evidência Anexado: ${detalhes.evidenciaLink}`, 40, 250); 
+        }
+        doc.save(`Avaliacao_${aula.titulo}_${aula.data.replace(/\//g, '-')}.pdf`);
+      } catch (err) { compartilharWhatsApp(encodeURIComponent(JSON.stringify(aula))); }
+    }
+
+    async function carregarMateriaisEducacionaisInstrutor() {
+      const grid = document.getElementById('gridFerramentasCards');
+      grid.innerHTML = '<div class="col-span-full p-8 text-center text-slate-400">Carregando ferramentas e cursos...</div>';
+      
+      try {
+        const snapAlunos = await db.collection("usuarios")
+          .where("tipo", "==", "aluno")
+          .where("instrutor", "==", usuarioLogado.nome)
+          .get();
+
+        todosAlunosCadastrados = [];
+        snapAlunos.forEach(doc => {
+          const al = doc.data();
+          al.id = doc.id;
+          todosAlunosCadastrados.push(al);
+        });
+
+        if (ehAdminMaster) {
+          const snapInst = await db.collection("usuarios")
+            .where("tipo", "in", ["instrutor", "admin"])
+            .get();
+          todosInstrutoresCadastrados = [];
+          snapInst.forEach(doc => {
+            const ins = doc.data();
+            ins.id = doc.id;
+            todosInstrutoresCadastrados.push(ins);
+          });
+        }
+
+        const snapCursos = await db.collection("cursos_ead").get();
+        todosMateriaisInstrutor = [];
+        let totalMatriculas = 0;
+        let totalAbertos = 0;
+
+        snapCursos.forEach(doc => {
+          const item = doc.data();
+          item.id = doc.id;
+
+          if (!ehAdminMaster) {
+            let liberadoParaInstrutor = false;
+            if (!item.destinadoInstrutores || item.destinadoInstrutores === 'todos' || item.destinadoInstrutores === '') {
+              liberadoParaInstrutor = true;
+            } else if (Array.isArray(item.destinadoInstrutores)) {
+              liberadoParaInstrutor = item.destinadoInstrutores.includes(usuarioLogado.cpf) || item.destinadoInstrutores.includes(usuarioLogado.nome);
+            } else if (typeof item.destinadoInstrutores === 'string') {
+              liberadoParaInstrutor = (item.destinadoInstrutores === usuarioLogado.cpf || item.destinadoInstrutores === usuarioLogado.nome);
+            }
+            if (!liberadoParaInstrutor) return;
+          }
+
+          if (!item.destinadoA || item.destinadoA === 'todos' || item.destinadoA === '') {
+            totalAbertos++;
+            totalMatriculas += todosAlunosCadastrados.length;
+          } else if (Array.isArray(item.destinadoA)) {
+            const alunosDoInstrutorMatriculados = item.destinadoA.filter(docAluno => 
+              todosAlunosCadastrados.some(a => a.cpf === docAluno || a.telefone === docAluno)
+            );
+            totalMatriculas += alunosDoInstrutorMatriculados.length;
+          } else if (typeof item.destinadoA === 'string') {
+            if (todosAlunosCadastrados.some(a => a.cpf === item.destinadoA || a.telefone === item.destinadoA)) {
+              totalMatriculas += 1;
+            }
+          }
+
+          todosMateriaisInstrutor.push(item);
+        });
+
+        document.getElementById('dashTotalCursos').innerText = todosMateriaisInstrutor.length;
+        document.getElementById('dashTotalMatriculas').innerText = totalMatriculas;
+        document.getElementById('dashTotalAbertos').innerText = totalAbertos;
+
+        renderizarCardsMateriais(todosMateriaisInstrutor);
+      } catch (err) {
+        grid.innerHTML = '<div class="col-span-full p-8 text-center text-rose-500">Erro ao carregar materiais: ' + err.message + '</div>';
+      }
+    }
+
+    function renderizarCardsMateriais(lista) {
+      const grid = document.getElementById('gridFerramentasCards');
+      grid.innerHTML = '';
+      if (lista.length === 0) {
+        grid.innerHTML = '<div class="col-span-full p-8 text-center text-slate-400">Nenhum curso ou ferramenta disponível no momento.</div>';
         return;
       }
 
-      btnTexto.innerText = "Verificando...";
-      btn.disabled = true;
+      lista.forEach(item => {
+        let textoAlunos = '';
+        if (!item.destinadoA || item.destinadoA === 'todos' || item.destinadoA === '') {
+          textoAlunos = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Todos os Alunos (${todosAlunosCadastrados.length})</span>`;
+        } else if (Array.isArray(item.destinadoA)) {
+          const qtd = item.destinadoA.filter(docAluno => todosAlunosCadastrados.some(a => a.cpf === docAluno || a.telefone === docAluno)).length;
+          textoAlunos = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-50 text-orange-600 border border-orange-200">${qtd} do(s) seu(s) Aluno(s)</span>`;
+        } else {
+          textoAlunos = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-50 text-orange-600 border border-orange-200">1 Aluno Matriculado</span>`;
+        }
 
-      const acao = perfilAtual === 'aluno' ? 'loginAluno' : 'loginInstrutor';
+        let tagInstrutores = '';
+        if (ehAdminMaster) {
+          if (!item.destinadoInstrutores || item.destinadoInstrutores === 'todos' || item.destinadoInstrutores === '') {
+            tagInstrutores = `<div class="mt-1"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-800 border border-teal-200">Instrutores: Liberado a Todos</span></div>`;
+          } else {
+            const qtdInst = Array.isArray(item.destinadoInstrutores) ? item.destinadoInstrutores.length : 1;
+            tagInstrutores = `<div class="mt-1"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">Instrutores Liberados: ${qtdInst}</span></div>`;
+          }
+        }
 
-      try {
-        const response = await fetch(WEBAPP_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: acao, telefone, senha })
+        // Botões de ação no card (se for Admin Master exibe também Cadastrar Instrutor)
+        let botoesAcaoHtml = '';
+        if (ehAdminMaster) {
+          botoesAcaoHtml = `
+            <div class="p-5 pt-0 space-y-2">
+              <div class="grid grid-cols-2 gap-2">
+                <button type="button" onclick="abrirPlayerFerramenta('${encodeURIComponent(JSON.stringify(item))}')" class="py-2 rounded-xl text-slate-700 bg-slate-100 hover:bg-slate-200 font-bold text-xs transition flex items-center justify-center gap-1 cursor-pointer">
+                  <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                  <span>Testar</span>
+                </button>
+                <button type="button" onclick="abrirModalMatriculas('${item.id}')" class="py-2 rounded-xl text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1 cursor-pointer" style="background-color: var(--btn-color);">
+                  <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                  <span>Alunos</span>
+                </button>
+              </div>
+              <button type="button" onclick="abrirModalLiberarParaInstrutoresDireto('${item.id}')" class="w-full py-2 bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer">
+                <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
+                <span>Cadastrar Instrutor</span>
+              </button>
+            </div>
+          `;
+        } else {
+          botoesAcaoHtml = `
+            <div class="p-5 pt-0 grid grid-cols-2 gap-2">
+              <button type="button" onclick="abrirPlayerFerramenta('${encodeURIComponent(JSON.stringify(item))}')" class="py-2.5 rounded-xl text-slate-700 bg-slate-100 hover:bg-slate-200 font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                <span>Testar</span>
+              </button>
+              <button type="button" onclick="abrirModalMatriculas('${item.id}')" class="py-2.5 rounded-xl text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer" style="background-color: var(--btn-color);">
+                <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                <span>Alunos</span>
+              </button>
+            </div>
+          `;
+        }
+
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between';
+        card.innerHTML = `
+          <div>
+            <div class="h-44 w-full bg-slate-100 overflow-hidden relative">
+              <img src="${item.capa}" class="w-full h-full object-cover transition-transform hover:scale-105" onerror="this.src='https://images.unsplash.com/photo-1516321497487-e288fb19713f?w=600&auto=format&fit=crop&q=80'">
+              <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-white/95 text-teal-800 shadow-sm">${item.categoria || 'Curso'}</span>
+            </div>
+            <div class="p-5 space-y-2">
+              <h4 class="font-extrabold text-slate-900 text-sm line-clamp-1">${item.titulo}</h4>
+              <p class="text-xs text-slate-500 line-clamp-2">${item.descricao}</p>
+              <div class="pt-1">${textoAlunos}</div>
+              ${tagInstrutores}
+            </div>
+          </div>
+          ${botoesAcaoHtml}
+        `;
+        grid.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    function filtrarMateriaisNaTela() {
+      const termo = document.getElementById('filtroPesquisaCursos').value.toLowerCase().trim();
+      if (!termo) {
+        renderizarCardsMateriais(todosMateriaisInstrutor);
+        return;
+      }
+      const filtrados = todosMateriaisInstrutor.filter(m => 
+        (m.titulo && m.titulo.toLowerCase().includes(termo)) ||
+        (m.categoria && m.categoria.toLowerCase().includes(termo)) ||
+        (m.descricao && m.descricao.toLowerCase().includes(termo))
+      );
+      renderizarCardsMateriais(filtrados);
+    }
+
+    function consultarCursosDoAlunoEspecifico() {
+      const termo = document.getElementById('filtroConsultaPorAluno').value.toLowerCase().trim();
+      const badge = document.getElementById('badgeResultadoAlunoCursos');
+      const box = document.getElementById('resultadoListaCursosAluno');
+
+      if (!termo) {
+        badge.innerText = 'Digite para consultar';
+        badge.className = 'text-[11px] font-bold text-teal-800 bg-teal-50 border border-teal-200 px-3 py-1 rounded-full';
+        box.classList.add('hidden');
+        box.innerHTML = '';
+        return;
+      }
+
+      const alunosEncontrados = todosAlunosCadastrados.filter(a => 
+        (a.nome && a.nome.toLowerCase().includes(termo)) ||
+        (a.cpf && a.cpf.toLowerCase().includes(termo)) ||
+        (a.telefone && a.telefone.toLowerCase().includes(termo))
+      );
+
+      if (alunosEncontrados.length === 0) {
+        badge.innerText = 'Nenhum aluno vinculado localizado';
+        badge.className = 'text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-3 py-1 rounded-full';
+        box.classList.remove('hidden');
+        box.innerHTML = '<div class="text-slate-400 italic">Nenhum aluno cadastrado sob o seu perfil com esses dados.</div>';
+        return;
+      }
+
+      box.classList.remove('hidden');
+      box.innerHTML = '';
+
+      alunosEncontrados.forEach(aluno => {
+        const cursosDoAluno = todosMateriaisInstrutor.filter(c => {
+          if (!c.destinadoA || c.destinadoA === 'todos' || c.destinadoA === '') return true;
+          if (Array.isArray(c.destinadoA)) return c.destinadoA.includes(aluno.cpf) || c.destinadoA.includes(aluno.telefone);
+          if (typeof c.destinadoA === 'string') return c.destinadoA === aluno.cpf || c.destinadoA === aluno.telefone;
+          return false;
         });
 
-        const res = await response.json();
+        const itemAlunoDiv = document.createElement('div');
+        itemAlunoDiv.className = 'p-3 bg-white rounded-xl border border-slate-200 space-y-2';
+        
+        let badgesCursos = cursosDoAluno.map(c => 
+          `<span class="inline-block px-2.5 py-1 bg-teal-50 text-teal-800 border border-teal-200 rounded-lg font-semibold text-[11px] mr-1 mb-1">📘 ${c.titulo}</span>`
+        ).join('');
 
-        if (res.sucesso) {
-          // Armazena a sessão e dados no localStorage
-          localStorage.setItem('previa_perfil', perfilAtual);
-          localStorage.setItem('previa_usuario', JSON.stringify(res.dados));
-          localStorage.setItem('previa_webapp_url', WEBAPP_URL);
-
-          // Redireciona para o painel correspondente no GitHub
-          if (perfilAtual === 'instrutor') {
-            window.location.href = "instrutor.html";
-          } else {
-            // Se você tiver aluno.html ou quiser direcionar
-            window.location.href = "aluno.html";
-          }
-        } else {
-          alert(res.mensagem || "Dados inválidos!");
+        if (cursosDoAluno.length === 0) {
+          badgesCursos = '<span class="text-slate-400 italic">Nenhum curso matriculado para este aluno.</span>';
         }
+
+        itemAlunoDiv.innerHTML = `
+          <div class="flex justify-between items-center border-b pb-1.5">
+            <div>
+              <span class="font-black text-slate-900 text-xs">${aluno.nome}</span>
+              <span class="text-slate-400 text-[10px] ml-1">(${aluno.cpf})</span>
+            </div>
+            <span class="px-2 py-0.5 rounded-full font-black text-[11px] bg-orange-100 text-orange-700 border border-orange-200">
+              ${cursosDoAluno.length} curso(s) cadastrado(s)
+            </span>
+          </div>
+          <div class="pt-1">${badgesCursos}</div>
+        `;
+        box.appendChild(itemAlunoDiv);
+      });
+
+      badge.innerText = `${alunosEncontrados.length} aluno(s) encontrado(s)`;
+      badge.className = 'text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full';
+    }
+
+    function abrirModalCadastrarMaterial() {
+      if (!ehAdminMaster) {
+        alert('Apenas o Admin Master possui permissão para cadastrar novos cursos e ferramentas.');
+        return;
+      }
+      const m = document.getElementById('modalCadastrarMaterial');
+      m.classList.remove('hidden');
+      setTimeout(() => { m.classList.remove('opacity-0'); m.querySelector('div').classList.remove('scale-95'); }, 10);
+      lucide.createIcons();
+    }
+
+    function fecharModalCadastrarMaterial() {
+      const m = document.getElementById('modalCadastrarMaterial');
+      m.classList.add('opacity-0'); m.querySelector('div').classList.add('scale-95');
+      setTimeout(() => m.classList.add('hidden'), 200);
+    }
+
+    async function salvarNovoMaterial(e) {
+      e.preventDefault();
+      if (!ehAdminMaster) {
+        alert('Apenas o Admin Master pode executar esta ação.');
+        return;
+      }
+      const btn = document.getElementById('btnSalvarMaterial');
+      btn.innerText = 'Salvando no Firebase...'; btn.disabled = true;
+
+      const titulo = document.getElementById('matTitulo').value.trim();
+      const categoria = document.getElementById('matCategoria').value.trim();
+      const descricao = document.getElementById('matDescricao').value.trim();
+      const capa = document.getElementById('matCapa').value.trim();
+      const url = document.getElementById('matUrl').value.trim();
+      const acesso = document.getElementById('matAcessoInicial').value;
+      const acessoInst = document.getElementById('matAcessoInstrutoresInicial').value;
+
+      try {
+        await db.collection("cursos_ead").add({
+          titulo: titulo,
+          categoria: categoria,
+          descricao: descricao,
+          capa: capa,
+          url: url,
+          destinadoA: acesso === 'todos' ? 'todos' : [],
+          destinadoInstrutores: acessoInst === 'todos' ? 'todos' : [],
+          criadoPor: usuarioLogado.nome,
+          criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert('Curso / Ferramenta cadastrado com sucesso!');
+        e.target.reset();
+        fecharModalCadastrarMaterial();
+        carregarMateriaisEducacionaisInstrutor();
       } catch (err) {
-        console.error(err);
-        alert("Falha na comunicação com a planilha. Verifique a URL do Apps Script.");
+        alert('Erro ao cadastrar material: ' + err.message);
       } finally {
-        btnTexto.innerText = "Acessar o Painel";
+        btn.innerText = '💾 Gravar no Firebase'; btn.disabled = false;
+      }
+    }
+
+    /* ==================== [FUNCIONALIDADE: CADASTRAR INSTRUTOR NO CURSO] ==================== */
+    async function abrirModalLiberarParaInstrutoresDireto(idCurso) {
+      if (!ehAdminMaster) {
+        alert('Apenas o Admin Master pode gerenciar a liberação para instrutores.');
+        return;
+      }
+
+      const curso = todosMateriaisInstrutor.find(c => c.id === idCurso);
+      if (!curso) return;
+
+      document.getElementById('matDocIdCursoInstrutor').value = idCurso;
+      document.getElementById('matInstCursoTituloSub').innerText = `Curso: ${curso.titulo}`;
+      document.getElementById('filtroInstrutorNoModal').value = '';
+
+      if (todosInstrutoresCadastrados.length === 0) {
+        const snap = await db.collection("usuarios").where("tipo", "in", ["instrutor", "admin"]).get();
+        todosInstrutoresCadastrados = [];
+        snap.forEach(d => {
+          const inst = d.data();
+          inst.id = d.id;
+          todosInstrutoresCadastrados.push(inst);
+        });
+      }
+
+      const ehAbertoTodos = (!curso.destinadoInstrutores || curso.destinadoInstrutores === 'todos' || curso.destinadoInstrutores === '');
+      const chkTodos = document.getElementById('chkTodosInstrutores');
+      chkTodos.checked = ehAbertoTodos;
+
+      let matriculados = [];
+      if (Array.isArray(curso.destinadoInstrutores)) {
+        matriculados = curso.destinadoInstrutores;
+      } else if (typeof curso.destinadoInstrutores === 'string' && !ehAbertoTodos) {
+        matriculados = [curso.destinadoInstrutores];
+      }
+
+      mapaSelecaoTemporariaInstrutores = {};
+      todosInstrutoresCadastrados.forEach(inst => {
+        mapaSelecaoTemporariaInstrutores[inst.cpf] = ehAbertoTodos || matriculados.includes(inst.cpf) || matriculados.includes(inst.nome);
+      });
+
+      renderizarListaInstrutoresCheckboxes(todosInstrutoresCadastrados, ehAbertoTodos);
+
+      const m = document.getElementById('modalMatriculasInstrutores');
+      m.classList.remove('hidden');
+      setTimeout(() => { m.classList.remove('opacity-0'); m.querySelector('div').classList.remove('scale-95'); }, 10);
+      lucide.createIcons();
+    }
+
+    function fecharModalLiberarParaInstrutores() {
+      const m = document.getElementById('modalMatriculasInstrutores');
+      m.classList.add('opacity-0'); m.querySelector('div').classList.add('scale-95');
+      setTimeout(() => m.classList.add('hidden'), 200);
+    }
+
+    function renderizarListaInstrutoresCheckboxes(lista, desabilitados) {
+      const listaDiv = document.getElementById('listaInstrutoresCheckboxes');
+      const badgeCont = document.getElementById('contagemInstrutoresFiltrados');
+      listaDiv.innerHTML = '';
+      badgeCont.innerText = `${lista.length} de ${todosInstrutoresCadastrados.length} instrutores`;
+
+      if (lista.length === 0) {
+        listaDiv.innerHTML = '<div class="p-3 text-center text-xs text-slate-400">Nenhum instrutor localizado.</div>';
+        return;
+      }
+
+      lista.forEach(inst => {
+        const marcado = mapaSelecaoTemporariaInstrutores[inst.cpf] || false;
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition';
+        row.innerHTML = `
+          <div class="flex items-center gap-2.5 overflow-hidden">
+            <input type="checkbox" value="${inst.cpf}" ${marcado ? 'checked' : ''} ${desabilitados ? 'disabled' : ''} onchange="atualizarSelecaoInstrutor('${inst.cpf}', this.checked)" class="chk-inst-item w-4 h-4 text-teal-600 rounded cursor-pointer">
+            <div class="truncate">
+              <div class="text-xs font-bold text-slate-800 truncate">${inst.nome}</div>
+              <div class="text-[10px] text-slate-400 font-semibold">${inst.cpf} ${inst.adminMaster ? '(Admin Master)' : ''}</div>
+            </div>
+          </div>
+          <span class="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md flex-shrink-0">Instrutor</span>
+        `;
+        listaDiv.appendChild(row);
+      });
+    }
+
+    function filtrarInstrutoresNoModal() {
+      const termo = document.getElementById('filtroInstrutorNoModal').value.toLowerCase().trim();
+      const chkTodos = document.getElementById('chkTodosInstrutores').checked;
+      if (!termo) {
+        renderizarListaInstrutoresCheckboxes(todosInstrutoresCadastrados, chkTodos);
+        return;
+      }
+      const filtrados = todosInstrutoresCadastrados.filter(i => 
+        (i.nome && i.nome.toLowerCase().includes(termo)) ||
+        (i.cpf && i.cpf.toLowerCase().includes(termo))
+      );
+      renderizarListaInstrutoresCheckboxes(filtrados, chkTodos);
+    }
+
+    function atualizarSelecaoInstrutor(cpf, valor) {
+      mapaSelecaoTemporariaInstrutores[cpf] = valor;
+    }
+
+    function alternarMarcarTodosInstrutores(marcado) {
+      todosInstrutoresCadastrados.forEach(i => {
+        mapaSelecaoTemporariaInstrutores[i.cpf] = marcado;
+      });
+      filtrarInstrutoresNoModal();
+    }
+
+    async function salvarLiberacaoInstrutoresNoFirebase() {
+      const idCurso = document.getElementById('matDocIdCursoInstrutor').value;
+      const chkTodos = document.getElementById('chkTodosInstrutores').checked;
+      const btn = document.getElementById('btnSalvarMatriculasInstrutores');
+      btn.innerText = 'Gravando liberação...'; btn.disabled = true;
+
+      try {
+        let novoDestinado;
+        if (chkTodos) {
+          novoDestinado = 'todos';
+        } else {
+          const selecionados = [];
+          Object.keys(mapaSelecaoTemporariaInstrutores).forEach(cpf => {
+            if (mapaSelecaoTemporariaInstrutores[cpf] === true) {
+              selecionados.push(cpf);
+            }
+          });
+          novoDestinado = selecionados;
+        }
+
+        await db.collection("cursos_ead").doc(idCurso).update({
+          destinadoInstrutores: novoDestinado,
+          atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert('Instrutores atualizados com sucesso no curso!');
+        fecharModalLiberarParaInstrutores();
+        carregarMateriaisEducacionaisInstrutor();
+      } catch (err) {
+        alert('Erro ao salvar liberação de instrutores: ' + err.message);
+      } finally {
+        btn.innerText = 'Salvar Liberação'; btn.disabled = false;
+      }
+    }
+
+    /* ==================== [CRIAR AVALIAÇÃO PRÁTICA COM CRITÉRIOS] ==================== */
+    function abrirModalCriarAvaliacao() {
+      const container = document.getElementById('containerListaCriteriosNovos');
+      container.innerHTML = '';
+      
+      const criteriosIniciais = [
+        "Uso correto dos pedais, embreagem e ponto de tração",
+        "Atenção à sinalização, preferência e cruzamentos",
+        "Alinhamento, baliza entre balizas e uso de retrovisores"
+      ];
+      criteriosIniciais.forEach(crit => adicionarLinhaCriterioNovaAvaliacao(crit));
+
+      document.getElementById('novaAvNomeModelo').value = '';
+      const m = document.getElementById('modalCriarAvaliacao');
+      m.classList.remove('hidden');
+      setTimeout(() => { m.classList.remove('opacity-0'); m.querySelector('div').classList.remove('scale-95'); }, 10);
+      lucide.createIcons();
+    }
+
+    function fecharModalCriarAvaliacao() {
+      const m = document.getElementById('modalCriarAvaliacao');
+      m.classList.add('opacity-0'); m.querySelector('div').classList.add('scale-95');
+      setTimeout(() => m.classList.add('hidden'), 200);
+    }
+
+    function adicionarLinhaCriterioNovaAvaliacao(textoValor = '') {
+      const container = document.getElementById('containerListaCriteriosNovos');
+      const idx = container.querySelectorAll('.linha-criterio-novo').length + 1;
+
+      const div = document.createElement('div');
+      div.className = 'linha-criterio-novo flex items-center gap-2 bg-white p-2 rounded-xl border border-slate-200';
+      div.innerHTML = `
+        <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black flex items-center justify-center flex-shrink-0">${idx}</span>
+        <input type="text" required value="${textoValor}" placeholder="Descreva o critério avaliativo..." class="inp-crit-desc flex-1 h-9 px-3 border border-slate-200 rounded-lg text-xs font-semibold outline-none focus:border-emerald-600">
+        <button type="button" onclick="this.parentElement.remove(); reordenarNumerosCriterios();" class="p-1.5 text-slate-400 hover:text-rose-600 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+      `;
+      container.appendChild(div);
+      lucide.createIcons();
+    }
+
+    function reordenarNumerosCriterios() {
+      const linhas = document.querySelectorAll('#containerListaCriteriosNovos .linha-criterio-novo');
+      linhas.forEach((linha, i) => {
+        const span = linha.querySelector('span');
+        if (span) span.innerText = i + 1;
+      });
+    }
+
+    async function salvarNovaAvaliacaoComCriterios(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSalvarNovaAvaliacao');
+      btn.innerText = 'Salvando avaliação...'; btn.disabled = true;
+
+      const nomeModelo = document.getElementById('novaAvNomeModelo').value.trim();
+      const inputs = document.querySelectorAll('#containerListaCriteriosNovos .inp-crit-desc');
+
+      if (!nomeModelo) {
+        alert('Informe o título do modelo de avaliação.');
+        btn.innerText = '💾 Gravar Avaliação no Firebase'; btn.disabled = false;
+        return;
+      }
+
+      if (inputs.length === 0) {
+        alert('Adicione pelo menos um critério pedagógico de avaliação.');
+        btn.innerText = '💾 Gravar Avaliação no Firebase'; btn.disabled = false;
+        return;
+      }
+
+      try {
+        const batch = db.batch();
+
+        const refModelo = db.collection("modelos_aula").doc();
+        batch.set(refModelo, {
+          nome: nomeModelo,
+          titulo: nomeModelo,
+          criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        inputs.forEach((inp, idx) => {
+          const refQuestao = db.collection("questoes_aula").doc();
+          batch.set(refQuestao, {
+            modelo: nomeModelo,
+            descricao: inp.value.trim(),
+            colLetter: `q${idx + 1}`,
+            ordem: idx + 1,
+            criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        });
+
+        await batch.commit();
+        alert(`Modelo de avaliação "${nomeModelo}" criado com ${inputs.length} critérios e ativado com sucesso!`);
+        fecharModalCriarAvaliacao();
+      } catch (err) {
+        alert('Erro ao criar avaliação no Firebase: ' + err.message);
+      } finally {
+        btn.innerText = '💾 Gravar Avaliação no Firebase'; btn.disabled = false;
+      }
+    }
+
+    /* ==================== [GERENCIAR MATRÍCULAS DE ALUNOS COM BUSCA] ==================== */
+    function abrirModalMatriculas(idCurso) {
+      materialSelecionadoParaMatricula = todosMateriaisInstrutor.find(m => m.id === idCurso);
+      if (!materialSelecionadoParaMatricula) return;
+
+      document.getElementById('matDocIdCurso').value = idCurso;
+      document.getElementById('matCursoTituloSub').innerText = materialSelecionadoParaMatricula.titulo;
+      document.getElementById('filtroAlunoNoModal').value = '';
+
+      const ehAbertoTodos = (!materialSelecionadoParaMatricula.destinadoA || materialSelecionadoParaMatricula.destinadoA === 'todos' || materialSelecionadoParaMatricula.destinadoA === '');
+      const chkTodos = document.getElementById('chkTodosAlunos');
+      chkTodos.checked = ehAbertoTodos;
+
+      let matriculadosArray = [];
+      if (Array.isArray(materialSelecionadoParaMatricula.destinadoA)) {
+        matriculadosArray = materialSelecionadoParaMatricula.destinadoA;
+      } else if (typeof materialSelecionadoParaMatricula.destinadoA === 'string' && !ehAbertoTodos) {
+        matriculadosArray = [materialSelecionadoParaMatricula.destinadoA];
+      }
+
+      mapaSelecaoTemporariaMatriculas = {};
+      todosAlunosCadastrados.forEach(a => {
+        mapaSelecaoTemporariaMatriculas[a.cpf] = ehAbertoTodos || matriculadosArray.includes(a.cpf) || matriculadosArray.includes(a.telefone);
+      });
+
+      renderizarListaAlunosCheckboxes(todosAlunosCadastrados, ehAbertoTodos);
+
+      const m = document.getElementById('modalGerenciarMatriculas');
+      m.classList.remove('hidden');
+      setTimeout(() => { m.classList.remove('opacity-0'); m.querySelector('div').classList.remove('scale-95'); }, 10);
+      lucide.createIcons();
+    }
+
+    function renderizarListaAlunosCheckboxes(lista, desabilitados) {
+      const listaDiv = document.getElementById('listaAlunosCheckboxes');
+      const badgeCont = document.getElementById('contagemAlunosFiltrados');
+      listaDiv.innerHTML = '';
+      badgeCont.innerText = `${lista.length} de ${todosAlunosCadastrados.length} de seus alunos`;
+
+      if (lista.length === 0) {
+        listaDiv.innerHTML = '<div class="p-3 text-center text-xs text-slate-400">Nenhum aluno vinculado localizado.</div>';
+        return;
+      }
+
+      lista.forEach(aluno => {
+        const marcado = mapaSelecaoTemporariaMatriculas[aluno.cpf] || false;
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition';
+        row.innerHTML = `
+          <div class="flex items-center gap-2.5 overflow-hidden">
+            <input type="checkbox" value="${aluno.cpf}" ${marcado ? 'checked' : ''} ${desabilitados ? 'disabled' : ''} onchange="atualizarSelecaoAlunoMatricula('${aluno.cpf}', this.checked)" class="chk-aluno-item w-4 h-4 text-orange-600 rounded cursor-pointer">
+            <div class="truncate">
+              <div class="text-xs font-bold text-slate-800 truncate">${aluno.nome}</div>
+              <div class="text-[10px] text-slate-400 font-semibold">${aluno.cpf}</div>
+            </div>
+          </div>
+          <span class="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md flex-shrink-0">Seu Aluno</span>
+        `;
+        listaDiv.appendChild(row);
+      });
+    }
+
+    function filtrarAlunosNoModalMatricula() {
+      const termo = document.getElementById('filtroAlunoNoModal').value.toLowerCase().trim();
+      const chkTodos = document.getElementById('chkTodosAlunos').checked;
+      if (!termo) {
+        renderizarListaAlunosCheckboxes(todosAlunosCadastrados, chkTodos);
+        return;
+      }
+      const filtrados = todosAlunosCadastrados.filter(a => 
+        (a.nome && a.nome.toLowerCase().includes(termo)) ||
+        (a.cpf && a.cpf.toLowerCase().includes(termo)) ||
+        (a.telefone && a.telefone.toLowerCase().includes(termo))
+      );
+      renderizarListaAlunosCheckboxes(filtrados, chkTodos);
+    }
+
+    function atualizarSelecaoAlunoMatricula(cpf, valor) {
+      mapaSelecaoTemporariaMatriculas[cpf] = valor;
+    }
+
+    function alternarMarcarTodos(marcado) {
+      todosAlunosCadastrados.forEach(a => {
+        mapaSelecaoTemporariaMatriculas[a.cpf] = marcado;
+      });
+      filtrarAlunosNoModalMatricula();
+    }
+
+    function fecharModalMatriculas() {
+      const m = document.getElementById('modalGerenciarMatriculas');
+      m.classList.add('opacity-0'); m.querySelector('div').classList.add('scale-95');
+      setTimeout(() => m.classList.add('hidden'), 200);
+    }
+
+    async function salvarMatriculasNoFirebase() {
+      const idCurso = document.getElementById('matDocIdCurso').value;
+      const chkTodos = document.getElementById('chkTodosAlunos').checked;
+      const btn = document.getElementById('btnSalvarMatriculas');
+      btn.innerText = 'Gravando matrículas...'; btn.disabled = true;
+
+      try {
+        let novoDestinadoA;
+        if (chkTodos) {
+          novoDestinadoA = 'todos';
+        } else {
+          const selecionados = [];
+          Object.keys(mapaSelecaoTemporariaMatriculas).forEach(cpf => {
+            if (mapaSelecaoTemporariaMatriculas[cpf] === true) {
+              selecionados.push(cpf);
+            }
+          });
+          novoDestinadoA = selecionados;
+        }
+
+        await db.collection("cursos_ead").doc(idCurso).update({
+          destinadoA: novoDestinadoA,
+          atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert('Matrículas atualizadas com sucesso no Firebase!');
+        fecharModalMatriculas();
+        carregarMateriaisEducacionaisInstrutor();
+      } catch (err) {
+        alert('Erro ao atualizar matrículas: ' + err.message);
+      } finally {
+        btn.innerText = 'Salvar Matrículas'; btn.disabled = false;
+      }
+    }
+
+    function abrirPlayerFerramenta(fEnc) {
+      const f = JSON.parse(decodeURIComponent(fEnc));
+      document.getElementById('tituloPlayerFerramenta').innerText = f.titulo;
+      document.getElementById('iframeFerramenta').src = f.url || f.urlEmbed || f.urlOriginal;
+      document.getElementById('boxPlayerFerramenta').classList.remove('hidden');
+      document.getElementById('gridFerramentasCards').classList.add('hidden');
+    }
+    function fecharPlayerFerramenta() {
+      document.getElementById('iframeFerramenta').src = '';
+      document.getElementById('boxPlayerFerramenta').classList.add('hidden');
+      document.getElementById('gridFerramentasCards').classList.remove('hidden');
+    }
+
+    async function salvarNovoAlunoPeloInstrutor(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSalvarAluno');
+      btn.innerText = 'Gravando no Firebase...'; btn.disabled = true;
+
+      const docIdentificador = document.getElementById('cadCpf').value.trim();
+      const senhaDigitada = document.getElementById('cadSenha').value.trim();
+      const senhaPadrao = docIdentificador.replace(/\D/g, '').substring(0, 4) || '1234';
+
+      try {
+        await db.collection("usuarios").add({
+          nome: document.getElementById('cadNome').value.trim(),
+          cpf: docIdentificador,
+          telefone: document.getElementById('cadTelefone').value.trim(),
+          senha: senhaDigitada || senhaPadrao,
+          email: document.getElementById('cadEmail').value.trim(),
+          endereco: document.getElementById('cadEndereco').value.trim(),
+          tipo: 'aluno',
+          instrutor: usuarioLogado.nome,
+          veiculo: usuarioLogado.veiculo || 'Ford Ka',
+          criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert('Aluno cadastrado e vinculado exclusivamente ao seu perfil com sucesso!');
+        e.target.reset();
+        document.getElementById('cadInstrutor').value = usuarioLogado.nome;
+      } catch (err) {
+        alert('Erro ao cadastrar aluno: ' + err.message);
+      } finally {
+        btn.innerText = '💾 Salvar Aluno';
         btn.disabled = false;
       }
     }
+
+    async function abrirModalSaibaMais() {
+      const modal = document.getElementById('modalSaibaMaisInstrutor');
+      const nomeInst = usuarioLogado ? (usuarioLogado.instrutor || usuarioLogado.nome || 'Amauri de Souza') : 'Amauri de Souza';
+      
+      const elNome = document.getElementById('modalInstNome');
+      const elVeiculo = document.getElementById('modalInstVeiculo');
+      const elResumo = document.getElementById('modalInstResumo');
+      const imgFoto = document.getElementById('modalInstFoto');
+      const fallbackFoto = document.getElementById('modalInstAvatarFallback');
+
+      elNome.innerText = nomeInst;
+      elVeiculo.innerText = "🚗 Veículo: " + (usuarioLogado ? (usuarioLogado.veiculo || 'Ford Ka') : 'Ford Ka');
+      elResumo.innerText = "Carregando informações do instrutor...";
+
+      modal.classList.remove('hidden');
+      setTimeout(() => { modal.classList.remove('opacity-0'); modal.querySelector('div').classList.remove('scale-95'); }, 10);
+      lucide.createIcons();
+
+      try {
+        const snap = await db.collection("usuarios")
+          .where("nome", "==", nomeInst)
+          .where("tipo", "==", "instrutor")
+          .get();
+
+        if (!snap.empty) {
+          const dadosInst = snap.docs[0].data();
+          elVeiculo.innerText = "🚗 Veículo: " + (dadosInst.veiculo || 'Ford Ka');
+          elResumo.innerText = dadosInst.resumo || "Profissional com vasta experiência no setor de trânsito, especializado em desenvolvimento prático e direção defensiva.";
+          
+          if (dadosInst.foto && dadosInst.foto.trim() !== '') {
+            imgFoto.src = dadosInst.foto.trim();
+            imgFoto.classList.remove('hidden');
+            fallbackFoto.classList.add('hidden');
+          } else {
+            imgFoto.classList.add('hidden');
+            fallbackFoto.classList.remove('hidden');
+          }
+        }
+      } catch (err) {
+        elResumo.innerText = "Profissional com vasta experiência no setor de trânsito, especializado em desenvolvimento prático e direção defensiva.";
+      }
+    }
+
+    function fecharModalSaibaMais() {
+      const modal = document.getElementById('modalSaibaMaisInstrutor');
+      modal.classList.add('opacity-0'); modal.querySelector('div').classList.add('scale-95');
+      setTimeout(() => modal.classList.add('hidden'), 200);
+    }
+
+    function verificarExibicaoBannerPWA() {
+      const jaEstaInstalado = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+      if (jaEstaInstalado) return;
+      if (sessionStorage.getItem('pwa_banner_fechado') === 'true') return;
+
+      setTimeout(() => {
+        const b = document.getElementById('bannerInstalacaoApp');
+        if (b) {
+          b.classList.remove('hidden');
+          b.classList.add('flex');
+        }
+      }, 500);
+    }
+
+    function fecharBannerInstalacaoApp() {
+      const b = document.getElementById('bannerInstalacaoApp');
+      if (b) {
+        b.classList.add('hidden');
+        b.classList.remove('flex');
+      }
+      sessionStorage.setItem('pwa_banner_fechado', 'true');
+    }
+
+    async function acionarInstalacaoApp() {
+      if (deferredPromptApp) {
+        deferredPromptApp.prompt();
+        const { outcome } = await deferredPromptApp.userChoice;
+        if (outcome === 'accepted') {
+          fecharBannerInstalacaoApp();
+        }
+        deferredPromptApp = null;
+      } else {
+        fecharBannerInstalacaoApp();
+      }
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPromptApp = e;
+      verificarExibicaoBannerPWA();
+    });
+
+    if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+      const swCode = `self.addEventListener('fetch', (event) => { event.respondWith(fetch(event.request)); });`;
+      const swBlob = new Blob([swCode], { type: 'text/javascript' });
+      navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(() => {});
+    }
+
+    function fazerLogout() { location.reload(); }
+
+    window.onload = () => {
+      lucide.createIcons();
+      verificarExibicaoBannerPWA();
+    };
   </script>
 </body>
 </html>
